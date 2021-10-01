@@ -75,13 +75,13 @@ class GraphicsProgram3D:
         if self.G_key_down:
             self.fov += 0.25 * delta_time
         if self.UP_key_down:
-            self.view_matrix.slide(0, 0, -1 * delta_time)
+            self.view_matrix.slide(0, 0, -3 * delta_time)
         if self.DOWN_key_down:
-            self.view_matrix.slide(0, 0, 1 * delta_time)
+            self.view_matrix.slide(0, 0, 3 * delta_time)
         if self.RIGHT_key_down:
-            self.view_matrix.slide(1 * delta_time, 0, 0)
+            self.view_matrix.slide(3 * delta_time, 0, 0)
         if self.LEFT_key_down:
-            self.view_matrix.slide(-1 * delta_time, 0, 0)
+            self.view_matrix.slide(-3 * delta_time, 0, 0)
         else:
             self.white_background = False
 
@@ -186,6 +186,38 @@ class GraphicsProgram3D:
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(5.8, 1.0, 3.0)
         self.model_matrix.add_rotate_y(pi/2)
+        self.model_matrix.add_scale(0.2, 2.5, 1.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        self.shader.set_solid_color(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(14.2, 1.0, -3.0)
+        self.model_matrix.add_rotate_y(pi/2)
+        self.model_matrix.add_scale(0.2, 2.5, 1.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        self.shader.set_solid_color(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(13.4, 1.0, -2.5)
+        self.model_matrix.add_scale(0.2, 2.5, 3.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        self.shader.set_solid_color(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(12.7, 1.0, -1.1)
+        self.model_matrix.add_rotate_y(pi / 2)
         self.model_matrix.add_scale(0.2, 2.5, 1.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
