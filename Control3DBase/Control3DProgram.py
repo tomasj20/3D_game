@@ -24,7 +24,7 @@ class GraphicsProgram3D:
         self.model_matrix = ModelMatrix()
 
         self.view_matrix = ViewMatrix()
-        self.view_matrix.look(Point(5.0, 2.0, 0.0), Point(0,0,0), Vector(0,1,0))
+        self.view_matrix.look(Point(5, 1, 8.0), Point(0, 1, 0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
 
         self.projection_matrix = ProjectionMatrix()
@@ -37,7 +37,35 @@ class GraphicsProgram3D:
 
         self.clock = pygame.time.Clock()
         self.clock.tick()
+        self.wall_list = [
+            [0.0, 0.0, -3.0, 50.0, 1.0, 50.0, False],
+            [15.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
+            [5.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
+            [8.9, 1.0, 5.0, 0.2, 1.0, 8.0, True],
+            [14.5, 1.0, 5.0, 0.2, 1.0, 1.2, True],
+            [11.1, 1.0, -3.1, 0.2, 1, 8.0, True],
+            [5.4, 1.0, -3.1, 0.2, 1.0, 1.0, True],
+            [8.0, 1.0, -1.5, 0.2, 1.0, 6.0, True],
+            [6.0, 1.0, 1.4, 0.2, 1.0, 4.0, False],
+            [5.8, 1.0, 4.0, 0.2, 1.0, 1.5, True],
+            [7.4, 1.0, 4.0, 0.2, 1.0, 2.0, False],
+            [10.5, 1.0, 3.1, 0.2, 1.0, 6.5, True],
+            [11.2, 1.0, 4.1, 0.2, 1.0, 5.5, True],
+            [14.0, 1.0, 4.5, 0.2, 1.0, 1.0, False],
+            [13.2, 1.0, -0.8, 0.2, 1.0, 4.5, False],
+            [10.2, 1.0, 1.4, 0.2, 1.0, 6.0, True],
+            [12.0, 1.0, -0.2, 0.2, 1.0, 3.0, False],
+            [7.3, 1.0, 0.4, 0.2, 1.0, 1.9, False],
+            [8.3, 1.0, -0.6, 0.2, 1.0, 2.0, False],
+            [10.9, 1.0, -0.6, 0.2, 1.0, 2.0, False],
+            [6.7, 1.0, -0.5, 0.2, 1.0, 1.4, True],
+            [9.6, 1.0, 0.5, 0.2, 1.0, 2.8, True],
+            [14.0, 1.0, 0.2, 0.2, 1.0, 4.3, False],
+            [13.0, 1.0, 2.3, 0.2, 1.0, 3.8, True],
+            [10.0, 1.0, 2.7, 0.2, 1.0, 1.0, False],
+            [8.7, 1.0, 2.3, 0.2, 1.0, 2.5, True]
 
+        ]
         self.angle = 0
 
         self.W_key_down = False
@@ -65,11 +93,11 @@ class GraphicsProgram3D:
             self.view_matrix.pitch(pi * delta_time)"""
         if self.A_key_down:
             #self.view_matrix.roll(pi * delta_time)
-            self.view_matrix.yaw(-pi*delta_time)
+            self.view_matrix.yaw(-90*delta_time)
         if self.D_key_down:
             #self.view_matrix.slide(1 * delta_time, 0, 0)
             #self.view_matrix.roll(-pi * delta_time)
-            self.view_matrix.yaw(pi * delta_time)
+            self.view_matrix.yaw(90 * delta_time)
         if self.T_key_down:
             self.fov -= 0.25 * delta_time
         if self.G_key_down:
@@ -102,10 +130,24 @@ class GraphicsProgram3D:
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.shader.set_solid_color(1.0, 0.0, 0.0)
+        for index in self.wall_list:
+            self.model_matrix.load_identity()
+            self.cube.set_verticies(self.shader)
+            self.model_matrix.push_matrix()
+            self.model_matrix.add_translation(index[0], index[1], index[2])
+            if index[6]:
+                self.model_matrix.add_rotate_y(pi / 2)
+            self.model_matrix.add_scale(index[3], index[4], index[5])
+            self.shader.set_model_matrix(self.model_matrix.matrix)
 
-        self.model_matrix.load_identity()
+            self.cube.draw()
+            self.model_matrix.pop_matrix()
+        pygame.display.flip()
+
+        """self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
-        self.shader.set_solid_color(1.0, 1.0, 1.0)
+        self.shader.set_solid_color(0.192,0.192,0.192)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(0.0, 0.0, -3.0)
         #self.model_matrix.add_rotate_x(self.angle * 0.4)
@@ -115,7 +157,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
-        """self.model_matrix.load_identity()
+        self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 1.0, 1.0)
         self.model_matrix.push_matrix()
@@ -125,7 +167,7 @@ class GraphicsProgram3D:
         self.model_matrix.add_scale(50.0, 2.5, 50.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
-        self.model_matrix.pop_matrix()"""
+        self.model_matrix.pop_matrix()
 
         #RIGHT BOX WALL
         self.model_matrix.load_identity()
@@ -439,7 +481,7 @@ class GraphicsProgram3D:
 
         #self.model_matrix.pop_matrix()
 
-        pygame.display.flip()
+        pygame.display.flip()"""
 
     def program_loop(self):
         exiting = False

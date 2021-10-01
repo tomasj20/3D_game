@@ -138,8 +138,8 @@ class ViewMatrix:
 
     def yaw(self, angle):
         # Rotate around v
-        c = cos(angle)
-        s = sin(angle)
+        c = cos(angle*pi/180)
+        s = sin(angle*pi/180)
         t = Vector(self.u.x, self.u.y, self.u.z)
         self.u = Vector(c * t.x + s * self.n.x,
                         c * t.y + s * self.n.y,
