@@ -131,7 +131,7 @@ class GraphicsProgram3D:
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(1.0, 1.0, 0.0)
+        self.model_matrix.add_translation(10.0, 1.0, 0.0)
         self.model_matrix.add_scale(0.2, 2.5, 4.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
