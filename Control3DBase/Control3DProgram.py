@@ -180,6 +180,17 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        self.shader.set_solid_color(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(5.8, 1.0, 3.0)
+        self.model_matrix.add_rotate_y(pi/2)
+        self.model_matrix.add_scale(0.2, 2.5, 1.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
 
 
 
