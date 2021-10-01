@@ -127,6 +127,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()"""
 
+        #RIGHT BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -137,6 +138,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LEFT BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -147,6 +149,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LOWER BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -158,6 +161,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #UPPER BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -169,6 +173,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #UPPER LEFT WALL IN MAZE
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -180,6 +185,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LOWER CORNER WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -191,6 +197,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LOWER BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -201,6 +208,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LOWER BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -212,6 +220,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LOWER BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -223,6 +232,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #LOWER BOX WALL
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -233,6 +243,7 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #UPPER RIGHT CORNER WALLS
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 0.5, 0.0)
@@ -265,6 +276,16 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        #CENTER WALL
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        self.shader.set_solid_color(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(10.0, 1.0, 2.3)
+        self.model_matrix.add_scale(0.2, 1.0, 1.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
 
 
 
