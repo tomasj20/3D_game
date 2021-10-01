@@ -40,7 +40,7 @@ class GraphicsProgram3D:
 
         self.angle = 0
 
-        self.W_key_down = False  ## --- ADD CONTROLS FOR OTHER KEYS TO CONTROL THE CAMERA --- ##
+        self.W_key_down = False
         self.S_key_down = False
         self.A_key_down = False
         self.D_key_down = False
@@ -88,17 +88,17 @@ class GraphicsProgram3D:
 
 
     def display(self):
-        glEnable(GL_DEPTH_TEST)  ### --- NEED THIS FOR NORMAL 3D BUT MANY EFFECTS BETTER WITH glDisable(GL_DEPTH_TEST) ... try it! --- ###
+        glEnable(GL_DEPTH_TEST)
 
         if self.white_background:
             glClearColor(1.0, 1.0, 1.0, 1.0)
         else:
             glClearColor(0.0, 0.0, 0.0, 1.0)
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)  ### --- YOU CAN ALSO CLEAR ONLY THE COLOR OR ONLY THE DEPTH --- ###
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         glViewport(0, 0, 800, 600)
 
-        self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.001, 1000)
+        self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
@@ -107,10 +107,10 @@ class GraphicsProgram3D:
         self.cube.set_verticies(self.shader)
         self.shader.set_solid_color(1.0, 1.0, 1.0)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(0.0, -2.0, -3.0)
+        self.model_matrix.add_translation(0.0, 0.0, -3.0)
         #self.model_matrix.add_rotate_x(self.angle * 0.4)
         #self.model_matrix.add_rotate_y(self.angle * 0.2453)
-        self.model_matrix.add_scale(50.0, 0.1, 50.0)
+        self.model_matrix.add_scale(50.0, 1.0, 50.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
