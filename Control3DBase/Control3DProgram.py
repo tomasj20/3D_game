@@ -26,6 +26,7 @@ class GraphicsProgram3D:
         self.view_matrix = ViewMatrix()
         self.view_matrix.look(Point(7, 1, 5.0), Point(10, 1.0, 0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
 
         self.projection_matrix = ProjectionMatrix()
         #self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
@@ -105,6 +106,7 @@ class GraphicsProgram3D:
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
             self.lvl = 2
             self.view_matrix.look(Point(8, 1, 8.0), Point(0, 1.0, 0), Vector(0, 1, 0))
+            print("You solved the maze!\nGenerating new maze!")
 
         if self.view_matrix.eye.x >= 6.0 and self.view_matrix.eye.x <= 8 and self.view_matrix.eye.z <= -2.5 and self.view_matrix.eye.z >= -4.0 and self.lvl == 2:
             pygame.quit()
@@ -143,8 +145,9 @@ class GraphicsProgram3D:
         if self.LEFT_key_down:
             self.view_matrix.slide(-3 * delta_time, 0, 0)
         if self.falling:
+            pygame.mixer.Sound.play(self.crash_sound)
             self.view_matrix.eye.y -= 3 * delta_time
-        if self.view_matrix.eye.y <= -6:
+        if self.view_matrix.eye.y <= -4:
             pygame.quit()
             quit()
         else:

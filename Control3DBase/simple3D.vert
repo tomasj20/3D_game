@@ -18,7 +18,6 @@ void main(void)
 	position = u_model_matrix * position;
 	normal = u_model_matrix * normal;
 	//## ADD CODE HERE ##
-
 	float light_factor_1 = max(dot(normalize(normal), normalize(vec4(1, 2, 3, 0))), 0.0);
 	float light_factor_2 = max(dot(normalize(normal), normalize(vec4(-3, -2, -1, 0))), 0.0);
 	v_color = (light_factor_1 + light_factor_2) * u_color; // ### --- Change this vector (pure white) to color variable --- #####
