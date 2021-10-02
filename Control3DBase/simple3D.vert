@@ -1,5 +1,6 @@
 attribute vec3 a_position;
 attribute vec3 a_normal;
+attribute vec2 a_uv;
 
 //## ADD CODE HERE ##
 
@@ -9,6 +10,7 @@ uniform mat4 u_projection_matrix;
 
 uniform vec4 u_color;
 varying vec4 v_color;  //Leave the varying variables alone to begin with
+varying vec2 v_uv;
 
 void main(void)
 {
@@ -20,9 +22,10 @@ void main(void)
 	//## ADD CODE HERE ##
 	float light_factor_1 = max(dot(normalize(normal), normalize(vec4(1, 2, 3, 0))), 0.0);
 	float light_factor_2 = max(dot(normalize(normal), normalize(vec4(-3, -2, -1, 0))), 0.0);
-	v_color = (light_factor_1 + light_factor_2) * u_color; // ### --- Change this vector (pure white) to color variable --- #####
+	v_uv = (light_factor_1 + light_factor_2) * a_uv; // ### --- Change this vector (pure white) to color variable --- #####
 
-	// ### --- Change the projection_view_matrix to separate view and projection matrices --- ### 
+	// ### --- Change the projection_view_matrix to separate view and projection matrices --- ###
+	//v_uv = a_uv;
 	position = u_view_matrix * position;
 	//eye coordinates
 
