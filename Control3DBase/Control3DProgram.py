@@ -28,7 +28,8 @@ class GraphicsProgram3D:
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.shader.set_diffuse_texture(0)
-        self.tex_id_wall_diffuse = self.load_texture("./textures/rustytiles/rustytiles01_diff.png")
+        self.tex_id_wall_diffuse = self.load_texture("./textures/brick_wall.jpg")
+        self.tex_id_skybox = self.load_texture("./textures/skybox.jpeg")
 
         self.projection_matrix = ProjectionMatrix()
         #self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
@@ -213,18 +214,7 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-            #Win tile
-            self.model_matrix.load_identity()
-            self.cube.set_verticies(self.shader)
-            #self.shader.set_solid_color(0.0, 1.0, 0.0)
-            self.model_matrix.push_matrix()
-            self.model_matrix.add_translation(6.5, 1.0, -3.08)
-            # self.model_matrix.add_rotate_x(self.angle * 0.4)
-            self.model_matrix.add_rotate_y(pi/2)
-            self.model_matrix.add_scale(0.2, 1.0, 1.2)
-            self.shader.set_model_matrix(self.model_matrix.matrix)
-            self.cube.draw()
-            self.model_matrix.pop_matrix()
+
         if self.lvl == 1:
             for index in self.wall_list2:
                 self.model_matrix.push_matrix()
@@ -236,19 +226,22 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-            #Win tile
-            self.model_matrix.load_identity()
-            self.cube.set_verticies(self.shader)
-            #self.shader.set_solid_color(0.0, 1.0, 0.0)
-            self.model_matrix.push_matrix()
-            self.model_matrix.add_translation(8.6, 1.0, -1.0)
-            # self.model_matrix.add_rotate_x(self.angle * 0.4)
-            self.model_matrix.add_rotate_y(pi/2)
-            self.model_matrix.add_scale(0.2, 1.0, 0.8)
-            self.shader.set_model_matrix(self.model_matrix.matrix)
-            self.cube.draw()
-            self.model_matrix.pop_matrix()
+
         glDisable(GL_TEXTURE_2D)
+
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_skybox)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(8.1, 5.0, 1.0)
+        self.model_matrix.add_scale(4.0, 0.5, 7.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
 
         pygame.display.flip()
 
