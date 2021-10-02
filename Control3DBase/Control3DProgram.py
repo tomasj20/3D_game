@@ -111,6 +111,7 @@ class GraphicsProgram3D:
         if self.view_matrix.eye.x >= 6.0 and self.view_matrix.eye.x <= 8 and self.view_matrix.eye.z <= -2.5 and self.view_matrix.eye.z >= -4.0 and self.lvl == 2:
             pygame.quit()
             quit()
+
     def check_if_died(self):
         if self.view_matrix.eye.x >= 10.0 or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
@@ -144,7 +145,7 @@ class GraphicsProgram3D:
             self.view_matrix.slide(3 * delta_time, 0, 0)
         if self.LEFT_key_down:
             self.view_matrix.slide(-3 * delta_time, 0, 0)
-        if self.falling:
+        if self.falling and self.lvl == 1:
             pygame.mixer.Sound.play(self.crash_sound)
             self.view_matrix.eye.y -= 3 * delta_time
         if self.view_matrix.eye.y <= -4:
