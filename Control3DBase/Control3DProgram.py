@@ -1,8 +1,9 @@
 
-# from OpenGL.GL import *
-# from OpenGL.GLU import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
 from math import *
-
+import time
 import pygame
 from pygame.locals import *
 
@@ -14,17 +15,17 @@ from Matrices import *
 
 class GraphicsProgram3D:
     def __init__(self):
-
-        pygame.init() 
+        pygame.font.init()
+        pygame.init()
         pygame.display.set_mode((800,600), pygame.OPENGL|pygame.DOUBLEBUF)
 
         self.shader = Shader3D()
         self.shader.use()
         self.lvl = 1
         self.model_matrix = ModelMatrix()
-
+        self.font = pygame.font.SysFont('BubbleShine.ttf', 70)
         self.view_matrix = ViewMatrix()
-        self.view_matrix.look(Point(7, 1, 5.0), Point(10, 1.0, 0), Vector(0, 1, 0))
+        self.view_matrix.look(Point(7, 1, 3.5), Point(10, 1.0, 0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
@@ -42,12 +43,15 @@ class GraphicsProgram3D:
         self.fov = pi / 2
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
-
+        self.t = 108
         self.cube = Cube()
         self.clock = pygame.time.Clock()
+        self.textX1 = 30
+        self.textY1 = 500
+        self.timer = 0
         self.clock.tick()
         self.wall_list = [
-            [0.0, 0.0, -3.0, 50.0, 1.0, 50.0, False],
+            [10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
             [15.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
             [5.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
             [8.9, 1.0, 5.0, 0.2, 1.0, 8.0, True],
@@ -76,7 +80,7 @@ class GraphicsProgram3D:
             #[6.6, 1.0, -5.1, 0.2, 1.0, 1.123, True],
         ]
         self.wall_list2 = [
-            [8.1, 0.0, 1.0, 4.0, 1.0, 7.0, False],
+            [8.1, -1.0, 0.0, 4.0, 1.0, 7.0, False],
             [10.0, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.2, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.8, 1.0, 3.0, 0.2, 1.0, 1.0, True],
@@ -110,12 +114,13 @@ class GraphicsProgram3D:
         self.white_background = False
         self.check_if_won()
         self.check_if_died()
+        #self.countdown()
 
     def check_if_won(self):
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
             self.lvl = 2
             pygame.mixer.Sound.play(self.lvlup_sound)
-            self.view_matrix.look(Point(8, 1, 8.0), Point(0, 1.0, 0), Vector(0, 1, 0))
+            self.view_matrix.look(Point(8, 1, 5.0), Point(0, 1.0, 0), Vector(0, 1, 0))
             print("You solved the maze!")
 
 
@@ -124,8 +129,22 @@ class GraphicsProgram3D:
             quit()
 
     def check_if_died(self):
-        if self.view_matrix.eye.x >= 10.0 or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
+        if (self.view_matrix.eye.x >= 10.0 and self.lvl==2) or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
+        if self.view_matrix.eye.z >= 5.0 and self.lvl == 1:
+            self.falling = True
+        if (self.view_matrix.eye.x >= 30.0 and self.lvl==2) or self.view_matrix.eye.x <= 5.0 and self.view_matrix.eye.z <= 10 and self.view_matrix.eye.z >= -10 and self.lvl == 2:
+            self.falling = True
+        if self.view_matrix.eye.z >= 7.3 and self.lvl == 2:
+            self.falling = True
+
+    def countdown(self):
+        while self.t:
+            mins, secs = divmod(self.t, 60)
+            self.timer = '{:02d}:{:02d}'.format(mins, secs)
+            print(self.timer, end="\r")
+            time.sleep(1)
+            self.t -= 1
 
     """def check_if_collision(self):
         if self.lvl ==2:
@@ -187,7 +206,7 @@ class GraphicsProgram3D:
             self.view_matrix.slide(3 * delta_time, 0, 0)
         if self.LEFT_key_down:
             self.view_matrix.slide(-3 * delta_time, 0, 0)
-        if self.falling and self.lvl == 1:
+        if self.falling:
             pygame.mixer.Sound.play(self.crash_sound)
             self.view_matrix.eye.y -= 3 * delta_time
         if self.view_matrix.eye.y <= -4:
@@ -195,17 +214,17 @@ class GraphicsProgram3D:
             quit()
         else:
             self.white_background = False
-        if self.lvl == 1:
-            pygame.mixer.Sound.play(self.soundtrack_sound)
+        #if self.lvl == 1:
+            #pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
         self.check_if_died()
 
 
-
     def display(self):
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_FRAMEBUFFER_SRGB)
+        glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
-
-
         if self.white_background:
             glClearColor(1.0, 1.0, 1.0, 1.0)
         else:
@@ -217,6 +236,11 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
+        textSurface = self.font.render(str(self.timer), True, (255, 255, 66, 255), (0, 66, 0, 255))
+        textData = pygame.image.tostring(textSurface, "RGBA", True)
+        glWindowPos2d(self.textX1, self.textY1)
+        glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
+
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_left)
         self.model_matrix.load_identity()
@@ -224,7 +248,7 @@ class GraphicsProgram3D:
         # self.shader.set_solid_color(0.0, 1.0, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(0.0, 0.0, 2.0)
-        self.model_matrix.add_scale(1.0, 15.0, 20.0)
+        self.model_matrix.add_scale(1.0, 20.0, 20.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -264,7 +288,7 @@ class GraphicsProgram3D:
         # self.shader.set_solid_color(0.0, 1.0, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(8.1, 1.0, 10.0)
-        self.model_matrix.add_scale(20.0, 15.0, 1.0)
+        self.model_matrix.add_scale(20.0, 20.0, 1.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -319,7 +343,7 @@ class GraphicsProgram3D:
 
         glDisable(GL_TEXTURE_2D)
 
-
+        glDisable(GL_BLEND)
         pygame.display.flip()
 
     def program_loop(self):
