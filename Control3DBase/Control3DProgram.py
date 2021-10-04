@@ -80,7 +80,7 @@ class GraphicsProgram3D:
             #[6.6, 1.0, -5.1, 0.2, 1.0, 1.123, True],
         ]
         self.wall_list2 = [
-            [8.1, -1.0, 0.0, 4.0, 1.0, 7.0, False],
+            [8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
             [10.0, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.2, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.8, 1.0, 3.0, 0.2, 1.0, 1.0, True],
@@ -120,7 +120,7 @@ class GraphicsProgram3D:
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
             self.lvl = 2
             pygame.mixer.Sound.play(self.lvlup_sound)
-            self.view_matrix.look(Point(8, 1, 5.0), Point(0, 1.0, 0), Vector(0, 1, 0))
+            self.view_matrix.look(Point(8, 1, 5.5), Point(0, 1.0, 0), Vector(0, 1, 0))
             print("You solved the maze!")
 
 
@@ -139,10 +139,7 @@ class GraphicsProgram3D:
             self.falling = True
 
     def countdown(self):
-        while self.t:
-            mins, secs = divmod(self.t, 60)
-            self.timer = '{:02d}:{:02d}'.format(mins, secs)
-            print(self.timer, end="\r")
+        while self.t > 0:
             time.sleep(1)
             self.t -= 1
 
@@ -223,7 +220,7 @@ class GraphicsProgram3D:
     def display(self):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_FRAMEBUFFER_SRGB)
-        glEnable(GL_CULL_FACE)
+        #glEnable(GL_CULL_FACE)
         glCullFace(GL_BACK)
         if self.white_background:
             glClearColor(1.0, 1.0, 1.0, 1.0)
@@ -236,10 +233,10 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
-        textSurface = self.font.render(str(self.timer), True, (255, 255, 66, 255), (0, 66, 0, 255))
-        textData = pygame.image.tostring(textSurface, "RGBA", True)
-        glWindowPos2d(self.textX1, self.textY1)
-        glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
+        #textSurface = self.font.render(str(self.t), True, (255, 255, 66, 255), (0, 66, 0, 255))
+        #textData = pygame.image.tostring(textSurface, "RGBA", True)
+        #glWindowPos2d(self.textX1, self.textY1)
+        #glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_left)
