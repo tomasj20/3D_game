@@ -12,6 +12,7 @@ uniform vec4 u_color;
 varying vec4 v_color;  //Leave the varying variables alone to begin with
 varying vec2 v_uv;
 
+
 void main(void)
 {
 	vec4 position = vec4(a_position.x, a_position.y, a_position.z, 1.0);

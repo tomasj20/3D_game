@@ -27,9 +27,15 @@ class GraphicsProgram3D:
         self.view_matrix.look(Point(7, 1, 5.0), Point(10, 1.0, 0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
+        self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
+        self.soundtrack_sound = pygame.mixer.Sound("sounds/soundtrack.wav")
         self.shader.set_diffuse_texture(0)
-        self.tex_id_wall_diffuse = self.load_texture("./textures/brick_wall.jpg")
-        self.tex_id_skybox = self.load_texture("./textures/skybox.jpeg")
+        self.tex_id_wall_diffuse = self.load_texture("./textures/wall1.png")
+        self.tex_id_skybox = self.load_texture("./textures/skybox.png")
+        self.tex_id_left = self.load_texture("./textures/left.png")
+        self.tex_id_right = self.load_texture("./textures/right.png")
+        self.tex_id_back = self.load_texture("./textures/back.png")
+        self.tex_id_mountains = self.load_texture("./textures/mountains.png")
 
         self.projection_matrix = ProjectionMatrix()
         #self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
@@ -108,8 +114,10 @@ class GraphicsProgram3D:
     def check_if_won(self):
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
             self.lvl = 2
+            pygame.mixer.Sound.play(self.lvlup_sound)
             self.view_matrix.look(Point(8, 1, 8.0), Point(0, 1.0, 0), Vector(0, 1, 0))
-            print("You solved the maze!\nGenerating new maze!")
+            print("You solved the maze!")
+
 
         if self.view_matrix.eye.x >= 6.0 and self.view_matrix.eye.x <= 8 and self.view_matrix.eye.z <= -2.5 and self.view_matrix.eye.z >= -4.0 and self.lvl == 2:
             pygame.quit()
@@ -118,6 +126,16 @@ class GraphicsProgram3D:
     def check_if_died(self):
         if self.view_matrix.eye.x >= 10.0 or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
+
+    """def check_if_collision(self):
+        if self.lvl ==2:
+            for index in self.wall_list:
+                if self.view_matrix.eye.x >= 10.0 or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
+                    pass
+        if self.lvl ==1:
+            for index in self.wall_list2:
+                if self.view_matrix.eye.x >= index[0] and self.view_matrix.eye.x <= index[0]+2 and self.view_matrix.eye.z >= index[3] and self.view_matrix.eye.z <= index[3]+4:"""
+
 
     def load_texture(self, image):
         """ Loads a texture into the buffer """
@@ -177,6 +195,8 @@ class GraphicsProgram3D:
             quit()
         else:
             self.white_background = False
+        if self.lvl == 1:
+            pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
         self.check_if_died()
 
@@ -185,9 +205,7 @@ class GraphicsProgram3D:
     def display(self):
         glCullFace(GL_BACK)
 
-        glEnable(GL_TEXTURE_2D)
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_diffuse)
+
         if self.white_background:
             glClearColor(1.0, 1.0, 1.0, 1.0)
         else:
@@ -199,10 +217,82 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_left)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(0.0, 0.0, 2.0)
+        self.model_matrix.add_scale(1.0, 15.0, 20.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_mountains)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(8.1, 1.0, -10.0)
+        self.model_matrix.add_scale(20.0, 30.0, 1.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_right)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(15.0, 1.0, 2.0)
+        self.model_matrix.add_rotate_y(pi/2)
+        self.model_matrix.add_scale(20.0, 15.0, 1.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_back)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(8.1, 1.0, 10.0)
+        self.model_matrix.add_scale(20.0, 15.0, 1.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_skybox)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(8.1, 25.0, 1.0)
+        self.model_matrix.add_scale(50.0, 0.5, 50.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
+
+
+
         #self.shader.set_solid_color(1.0, 0.0, 0.0)
+        glEnable(GL_TEXTURE_2D)
+        glColor3f(1, 1, 1)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_diffuse)
         if self.lvl == 2:
             for index in self.wall_list:
                 self.model_matrix.push_matrix()
@@ -227,19 +317,6 @@ class GraphicsProgram3D:
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
 
-        glDisable(GL_TEXTURE_2D)
-
-        glActiveTexture(GL_TEXTURE1)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_skybox)
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(8.1, 5.0, 1.0)
-        self.model_matrix.add_scale(4.0, 0.5, 7.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)
 
 
