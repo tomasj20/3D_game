@@ -166,26 +166,28 @@ class GraphicsProgram3D:
 
     def collison_check(self):
         for item in self.wall_list2:
-            self.wall_min_x = item[0] - item[3] / 2
-            self.wall_max_x = item[0] + item[3] / 2
-            self.wall_min_z = item[2] - item[5] / 2
-            self.wall_max_z = item[2] + item[5] / 2
-            if self.wall_min_x <= self.view_matrix.eye.x <= self.wall_max_x and not item[6]:
-                if self.wall_min_z <= self.view_matrix.eye.z <= self.wall_max_z:
-                    self.collisionNormal = True
-                    return True
-            else:
-                self.collisionNormal = False
-            self.ang_wall_min_x = item[0] - item[3] / 2
-            self.ang_wall_max_x = item[0] + item[3] / 2
-            self.ang_wall_min_z = item[2] - item[5] / 2
-            self.ang_wall_max_z = item[2] + item[5] / 2
-            if self.ang_wall_min_x <= self.view_matrix.eye.z <= self.ang_wall_max_x and item[6]:
-                if self.ang_wall_min_z <= self.view_matrix.eye.x <= self.ang_wall_max_z:
-                    self.collisionAngle = True
-                    return True
-            else:
-                self.collisionAngle = False
+            if not item[6]:
+                self.wall_min_x = item[0] - item[3] / 2
+                self.wall_max_x = item[0] + item[3] / 2
+                self.wall_min_z = item[2] - item[5] / 2
+                self.wall_max_z = item[2] + item[5] / 2
+                if self.wall_min_x <= self.view_matrix.eye.x <= self.wall_max_x:
+                    if self.wall_min_z <= self.view_matrix.eye.z <= self.wall_max_z:
+                        self.collisionNormal = True
+                        return True
+                else:
+                    self.collisionNormal = False
+            if item[6]:
+                self.ang_wall_max_z = item[0] + item[3] / 2
+                self.ang_wall_min_z = item[0] - item[3] / 2
+                self.ang_wall_max_x = item[2] + item[5] / 2
+                self.ang_wall_min_x = item[2] - item[5] / 2
+                if self.ang_wall_min_x <= self.view_matrix.eye.x <= self.ang_wall_max_x:
+                    if self.ang_wall_min_z <= self.view_matrix.eye.z <= self.ang_wall_max_z:
+                        self.collisionAngle = True
+                        return True
+                else:
+                    self.collisionAngle = False
 
     def load_texture(self, image):
         """ Loads a texture into the buffer """
