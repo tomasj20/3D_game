@@ -178,10 +178,10 @@ class GraphicsProgram3D:
                 else:
                     self.collisionNormal = False
             if item[6]:
-                self.ang_wall_max_z = item[0] + item[3] / 2
-                self.ang_wall_min_z = item[0] - item[3] / 2
-                self.ang_wall_max_x = item[2] + item[5] / 2
-                self.ang_wall_min_x = item[2] - item[5] / 2
+                self.ang_wall_max_x = item[0] + item[5] / 2
+                self.ang_wall_min_x = item[0] - item[5] / 2
+                self.ang_wall_max_z = item[2] + item[3] / 2
+                self.ang_wall_min_z = item[2] - item[3] / 2
                 if self.ang_wall_min_x <= self.view_matrix.eye.x <= self.ang_wall_max_x:
                     if self.ang_wall_min_z <= self.view_matrix.eye.z <= self.ang_wall_max_z:
                         self.collisionAngle = True
