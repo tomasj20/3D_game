@@ -109,6 +109,12 @@ class GraphicsProgram3D:
             [10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
             [10.0, 2.0, 2.0, 10.0, 1.0, 10.0, False],
         ]
+
+        self.ceilingandfloorlvl2 = [
+            [10.0, 0.0, 2.0, 10.0, 1.0, 12.0, False],
+            [10.0, 2.0, 2.0, 10.0, 1.0, 12.0, False],
+        ]
+
         self.angle = 0
         self.collisionNormal = False
         self.collisionAngle = False
@@ -330,6 +336,19 @@ class GraphicsProgram3D:
         glBindTexture(GL_TEXTURE_2D, self.tex_id_floorandceiling)
         if self.lvl == 1:
             for index in self.ceilingandfloorlvl1:
+                self.model_matrix.push_matrix()
+                self.model_matrix.add_translation(index[0], index[1], index[2])
+                if index[6]:
+                    self.model_matrix.add_rotate_y(pi / 2)
+                self.model_matrix.add_scale(index[3], index[4], index[5])
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+
+                self.cube.draw()
+                self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
+        if self.lvl == 2:
+            for index in self.ceilingandfloorlvl2:
                 self.model_matrix.push_matrix()
                 self.model_matrix.add_translation(index[0], index[1], index[2])
                 if index[6]:
