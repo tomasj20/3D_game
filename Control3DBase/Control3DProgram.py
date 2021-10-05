@@ -10,6 +10,7 @@ from pygame.locals import *
 import sys
 import time
 
+from gameobjects import *
 from Shaders import *
 from Matrices import *
 
@@ -21,8 +22,13 @@ class GraphicsProgram3D:
 
         self.shader = Shader3D()
         self.shader.use()
+        self.walls = None
+        self.walls_by_x = [
+        ]
+        self.walls_by_z = []
         self.lvl = 1
         self.model_matrix = ModelMatrix()
+        self.player = None
         self.font = pygame.font.SysFont('BubbleShine.ttf', 70)
         self.view_matrix = ViewMatrix()
         self.view_matrix.look(Point(7, 1, 3.5), Point(10, 1.0, 0), Vector(0, 1, 0))
@@ -30,14 +36,15 @@ class GraphicsProgram3D:
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
         self.soundtrack_sound = pygame.mixer.Sound("sounds/soundtrack.wav")
-        self.shader.set_diffuse_texture(0)
+        #self.shader.set_diffuse_texture(0)
         self.tex_id_wall_diffuse = self.load_texture("./textures/wall1.png")
         self.tex_id_skybox = self.load_texture("./textures/skybox.png")
         self.tex_id_left = self.load_texture("./textures/left.png")
         self.tex_id_right = self.load_texture("./textures/right.png")
         self.tex_id_back = self.load_texture("./textures/back.png")
         self.tex_id_mountains = self.load_texture("./textures/mountains.png")
-
+        self.tex_id_player = self.load_texture("./textures/player.png")
+        #self.update_bounding_box()
         self.projection_matrix = ProjectionMatrix()
         #self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
         self.fov = pi / 2
@@ -45,6 +52,9 @@ class GraphicsProgram3D:
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
         self.t = 108
         self.cube = Cube()
+        self.scale = Point(1, 1, 1)
+        self.radius = self.scale.x/2
+        self.direction = None
         self.clock = pygame.time.Clock()
         self.textX1 = 30
         self.textY1 = 500
@@ -80,7 +90,7 @@ class GraphicsProgram3D:
             #[6.6, 1.0, -5.1, 0.2, 1.0, 1.123, True],
         ]
         self.wall_list2 = [
-            [8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
+            #[8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
             [10.0, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.2, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.8, 1.0, 3.0, 0.2, 1.0, 1.0, True],
@@ -98,8 +108,10 @@ class GraphicsProgram3D:
             [8.1, 1.0, 2.6, 0.2, 1, 1.0, False],
 
         ]
+        self.wall_pos = []
         self.angle = 0
-
+        self.collisionNormal = False
+        self.collisionAngle = False
         self.W_key_down = False
         self.S_key_down = False
         self.A_key_down = False
@@ -115,6 +127,15 @@ class GraphicsProgram3D:
         self.check_if_won()
         self.check_if_died()
         #self.countdown()
+        self.collison_check()
+        self.wall_min_x = None
+        self.wall_max_x = None
+        self.wall_max_z = None
+        self.wall_min_z = None
+        self.ang_wall_min_x = None
+        self.ang_wall_max_x = None
+        self.ang_wall_max_z = None
+        self.ang_wall_min_z = None
 
     def check_if_won(self):
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
@@ -129,7 +150,7 @@ class GraphicsProgram3D:
             quit()
 
     def check_if_died(self):
-        if (self.view_matrix.eye.x >= 10.0 and self.lvl==2) or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
+        if (self.view_matrix.eye.x >= 10.0 and self.lvl==1) or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
         if self.view_matrix.eye.z >= 5.0 and self.lvl == 1:
             self.falling = True
@@ -143,15 +164,28 @@ class GraphicsProgram3D:
             time.sleep(1)
             self.t -= 1
 
-    """def check_if_collision(self):
-        if self.lvl ==2:
-            for index in self.wall_list:
-                if self.view_matrix.eye.x >= 10.0 or self.view_matrix.eye.x <= 6 and self.view_matrix.eye.z <= 4 and self.view_matrix.eye.z >= -3 and self.lvl == 1:
-                    pass
-        if self.lvl ==1:
-            for index in self.wall_list2:
-                if self.view_matrix.eye.x >= index[0] and self.view_matrix.eye.x <= index[0]+2 and self.view_matrix.eye.z >= index[3] and self.view_matrix.eye.z <= index[3]+4:"""
-
+    def collison_check(self):
+        for item in self.wall_list2:
+            self.wall_min_x = item[0] - item[3] / 2
+            self.wall_max_x = item[0] + item[3] / 2
+            self.wall_min_z = item[2] - item[5] / 2
+            self.wall_max_z = item[2] + item[5] / 2
+            if self.wall_min_x <= self.view_matrix.eye.x <= self.wall_max_x and not item[6]:
+                if self.wall_min_z <= self.view_matrix.eye.z <= self.wall_max_z:
+                    self.collisionNormal = True
+                    return True
+            else:
+                self.collisionNormal = False
+            self.ang_wall_min_x = item[0] - item[3] / 2
+            self.ang_wall_max_x = item[0] + item[3] / 2
+            self.ang_wall_min_z = item[2] - item[5] / 2
+            self.ang_wall_max_z = item[2] + item[5] / 2
+            if self.ang_wall_min_x <= self.view_matrix.eye.z <= self.ang_wall_max_x and item[6]:
+                if self.ang_wall_min_z <= self.view_matrix.eye.x <= self.ang_wall_max_z:
+                    self.collisionAngle = True
+                    return True
+            else:
+                self.collisionAngle = False
 
     def load_texture(self, image):
         """ Loads a texture into the buffer """
@@ -195,8 +229,8 @@ class GraphicsProgram3D:
             self.fov -= 0.25 * delta_time
         if self.G_key_down:
             self.fov += 0.25 * delta_time
-        if self.UP_key_down:
-            self.view_matrix.slide(0, 0, -3 * delta_time)
+        if self.UP_key_down and not self.collisionNormal and not self.collisionAngle:
+            self.view_matrix.slide(0, 0, -1.5 * delta_time)
         if self.DOWN_key_down:
             self.view_matrix.slide(0, 0, 3 * delta_time)
         if self.RIGHT_key_down:
@@ -204,18 +238,29 @@ class GraphicsProgram3D:
         if self.LEFT_key_down:
             self.view_matrix.slide(-3 * delta_time, 0, 0)
         if self.falling:
-            pygame.mixer.Sound.play(self.crash_sound)
+            #pygame.mixer.Sound.play(self.crash_sound)
             self.view_matrix.eye.y -= 3 * delta_time
+        if self.collisionNormal and self.UP_key_down:
+            self.view_matrix.slide(0, 0, 0)
+        if self.collisionAngle and self.UP_key_down:
+            self.view_matrix.slide(0, 0, 0)
         if self.view_matrix.eye.y <= -4:
             pygame.quit()
             quit()
         else:
             self.white_background = False
+        """for wall in self.wall_list2:
+            if self.collision_check(wall[0][5]):
+                # The response to the collision should be here,
+                # but it wound up being inside the collision function
+                pass"""
         #if self.lvl == 1:
             #pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
         self.check_if_died()
-
+        """for index in self.wall_list2:
+            if Point(index[0], index[2]) == Point(self.view_matrix.eye.x, self.view_matrix.z):"""
+        self.collison_check()
 
     def display(self):
         glEnable(GL_DEPTH_TEST)
@@ -233,10 +278,28 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
+
         #textSurface = self.font.render(str(self.t), True, (255, 255, 66, 255), (0, 66, 0, 255))
         #textData = pygame.image.tostring(textSurface, "RGBA", True)
         #glWindowPos2d(self.textX1, self.textY1)
         #glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
+
+        self.shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+
+        '''glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_player)
+        self.model_matrix.load_identity()
+        self.cube.set_verticies(self.shader)
+        # self.shader.set_solid_color(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.1, self.view_matrix.eye.z+0.4)
+        self.model_matrix.add_scale(0.2, 0.2, 0.2)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)'''
 
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_left)
@@ -244,8 +307,9 @@ class GraphicsProgram3D:
         self.cube.set_verticies(self.shader)
         # self.shader.set_solid_color(0.0, 1.0, 0.0)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(0.0, 0.0, 2.0)
-        self.model_matrix.add_scale(1.0, 20.0, 20.0)
+        self.model_matrix.add_translation(0.0, 1.0, 2.0)
+        self.model_matrix.add_rotate_y(pi / 2)
+        self.model_matrix.add_scale(20.0, 30.0, 1.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -258,7 +322,7 @@ class GraphicsProgram3D:
         # self.shader.set_solid_color(0.0, 1.0, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(8.1, 1.0, -10.0)
-        self.model_matrix.add_scale(20.0, 30.0, 1.0)
+        self.model_matrix.add_scale(25.0, 30.0, 1.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -270,9 +334,9 @@ class GraphicsProgram3D:
         self.cube.set_verticies(self.shader)
         # self.shader.set_solid_color(0.0, 1.0, 0.0)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(15.0, 1.0, 2.0)
+        self.model_matrix.add_translation(20.0, 1.0, 2.0)
         self.model_matrix.add_rotate_y(pi/2)
-        self.model_matrix.add_scale(20.0, 15.0, 1.0)
+        self.model_matrix.add_scale(20.0, 30.0, 1.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -285,15 +349,14 @@ class GraphicsProgram3D:
         # self.shader.set_solid_color(0.0, 1.0, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(8.1, 1.0, 10.0)
-        self.model_matrix.add_scale(20.0, 20.0, 1.0)
+        self.model_matrix.add_rotate_y(pi)
+        self.model_matrix.add_scale(20.0, 30.0, 1.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)
 
-        self.shader.set_view_matrix(self.view_matrix.get_matrix())
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
+
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_skybox)
         self.model_matrix.load_identity()
@@ -423,6 +486,7 @@ class GraphicsProgram3D:
 
         #OUT OF GAME LOOP
         pygame.quit()
+
 
     def start(self):
         self.program_loop()
