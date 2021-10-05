@@ -61,7 +61,7 @@ class GraphicsProgram3D:
         self.timer = 0
         self.clock.tick()
         self.wall_list = [
-            [10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
+            #[10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
             [15.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
             [5.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
             [8.9, 1.0, 5.0, 0.2, 1.0, 8.0, True],
@@ -165,29 +165,59 @@ class GraphicsProgram3D:
             self.t -= 1
 
     def collison_check(self):
-        for item in self.wall_list2:
-            if not item[6]:
-                self.wall_min_x = item[0] - item[3] / 2
-                self.wall_max_x = item[0] + item[3] / 2
-                self.wall_min_z = item[2] - item[5] / 2
-                self.wall_max_z = item[2] + item[5] / 2
-                if self.wall_min_x <= self.view_matrix.eye.x <= self.wall_max_x:
-                    if self.wall_min_z <= self.view_matrix.eye.z <= self.wall_max_z:
-                        self.collisionNormal = True
-                        return True
-                else:
-                    self.collisionNormal = False
-            if item[6]:
-                self.ang_wall_max_x = item[0] + item[5] / 2
-                self.ang_wall_min_x = item[0] - item[5] / 2
-                self.ang_wall_max_z = item[2] + item[3] / 2
-                self.ang_wall_min_z = item[2] - item[3] / 2
-                if self.ang_wall_min_x <= self.view_matrix.eye.x <= self.ang_wall_max_x:
-                    if self.ang_wall_min_z <= self.view_matrix.eye.z <= self.ang_wall_max_z:
-                        self.collisionAngle = True
-                        return True
-                else:
-                    self.collisionAngle = False
+        if self.lvl == 1:
+            for item in self.wall_list2:
+                if not item[6]:
+                    self.wall_min_x = item[0] - item[3] / 2
+                    self.wall_max_x = item[0] + item[3] / 2
+                    self.wall_min_z = item[2] - item[5] / 2
+                    self.wall_max_z = item[2] + item[5] / 2
+                    if self.wall_min_x-0.05 <= self.view_matrix.eye.x <= self.wall_max_x+0.05:
+                        if self.wall_min_z-0.05 <= self.view_matrix.eye.z <= self.wall_max_z+0.05:
+                            self.collisionNormal = True
+                            return True
+                    else:
+                        self.collisionNormal = False
+                if item[6]:
+                    self.ang_wall_max_x = item[0] + item[5] / 2
+                    self.ang_wall_min_x = item[0] - item[5] / 2
+                    self.ang_wall_max_z = item[2] + item[3] / 2
+                    self.ang_wall_min_z = item[2] - item[3] / 2
+                    if self.ang_wall_min_x-0.05 <= self.view_matrix.eye.x <= self.ang_wall_max_x+0.05:
+                        if self.ang_wall_min_z-0.05 <= self.view_matrix.eye.z <= self.ang_wall_max_z+0.05:
+                            self.collisionAngle = True
+                            return True
+                    else:
+                        self.collisionAngle = False
+        if self.lvl == 2:
+            for item in self.wall_list:
+                if not item[6]:
+                    self.wall_min_x = item[0] - item[3] / 2
+                    self.wall_max_x = item[0] + item[3] / 2
+                    self.wall_min_z = item[2] - item[5] / 2
+                    self.wall_max_z = item[2] + item[5] / 2
+                    if self.wall_min_x-0.05 <= self.view_matrix.eye.x <= self.wall_max_x+0.05:
+                        if self.wall_min_z-0.05 <= self.view_matrix.eye.z <= self.wall_max_z+0.05:
+                            self.collisionNormal = True
+                            return True
+                    else:
+                        self.collisionNormal = False
+                if item[6]:
+                    self.ang_wall_max_x = item[0] + item[5] / 2
+                    self.ang_wall_min_x = item[0] - item[5] / 2
+                    self.ang_wall_max_z = item[2] + item[3] / 2
+                    self.ang_wall_min_z = item[2] - item[3] / 2
+                    if self.ang_wall_min_x-0.05 <= self.view_matrix.eye.x <= self.ang_wall_max_x+0.05:
+                        if self.ang_wall_min_z-0.05 <= self.view_matrix.eye.z <= self.ang_wall_max_z+0.05:
+                            self.collisionAngle = True
+
+                            return True
+                    else:
+                        self.collisionAngle = False
+
+
+
+
 
     def load_texture(self, image):
         """ Loads a texture into the buffer """
@@ -240,7 +270,7 @@ class GraphicsProgram3D:
         if self.LEFT_key_down:
             self.view_matrix.slide(-3 * delta_time, 0, 0)
         if self.falling:
-            #pygame.mixer.Sound.play(self.crash_sound)
+            pygame.mixer.Sound.play(self.crash_sound)
             self.view_matrix.eye.y -= 3 * delta_time
         if self.collisionNormal and self.UP_key_down:
             self.view_matrix.slide(0, 0, 0)
@@ -251,17 +281,10 @@ class GraphicsProgram3D:
             quit()
         else:
             self.white_background = False
-        """for wall in self.wall_list2:
-            if self.collision_check(wall[0][5]):
-                # The response to the collision should be here,
-                # but it wound up being inside the collision function
-                pass"""
         #if self.lvl == 1:
             #pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
         self.check_if_died()
-        """for index in self.wall_list2:
-            if Point(index[0], index[2]) == Point(self.view_matrix.eye.x, self.view_matrix.z):"""
         self.collison_check()
 
     def display(self):
