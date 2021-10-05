@@ -38,12 +38,8 @@ class GraphicsProgram3D:
         self.soundtrack_sound = pygame.mixer.Sound("sounds/soundtrack.wav")
         #self.shader.set_diffuse_texture(0)
         self.tex_id_wall_diffuse = self.load_texture("./textures/wall1.png")
-        self.tex_id_skybox = self.load_texture("./textures/skybox.png")
-        self.tex_id_left = self.load_texture("./textures/left.png")
-        self.tex_id_right = self.load_texture("./textures/right.png")
-        self.tex_id_back = self.load_texture("./textures/back.png")
-        self.tex_id_mountains = self.load_texture("./textures/mountains.png")
-        self.tex_id_player = self.load_texture("./textures/player.png")
+        self.tex_id_floorandceiling = self.load_texture("./textures/floorandceiling.png")
+
         #self.update_bounding_box()
         self.projection_matrix = ProjectionMatrix()
         #self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
@@ -108,7 +104,11 @@ class GraphicsProgram3D:
             [8.1, 1.0, 2.6, 0.2, 1, 1.0, False],
 
         ]
-        self.wall_pos = []
+
+        self.ceilingandfloorlvl1 = [
+            [10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
+            [10.0, 2.0, 2.0, 10.0, 1.0, 10.0, False],
+        ]
         self.angle = 0
         self.collisionNormal = False
         self.collisionAngle = False
@@ -325,78 +325,21 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)'''
-
         glEnable(GL_TEXTURE_2D)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_left)
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(0.0, 1.0, 2.0)
-        self.model_matrix.add_rotate_y(pi / 2)
-        self.model_matrix.add_scale(20.0, 30.0, 1.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
+        glColor3f(1, 1, 1)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_floorandceiling)
+        if self.lvl == 1:
+            for index in self.ceilingandfloorlvl1:
+                self.model_matrix.push_matrix()
+                self.model_matrix.add_translation(index[0], index[1], index[2])
+                if index[6]:
+                    self.model_matrix.add_rotate_y(pi / 2)
+                self.model_matrix.add_scale(index[3], index[4], index[5])
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+
+                self.cube.draw()
+                self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)
-
-        glEnable(GL_TEXTURE_2D)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_mountains)
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(8.1, 1.0, -10.0)
-        self.model_matrix.add_scale(25.0, 30.0, 1.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)
-
-        glEnable(GL_TEXTURE_2D)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_right)
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(20.0, 1.0, 2.0)
-        self.model_matrix.add_rotate_y(pi/2)
-        self.model_matrix.add_scale(20.0, 30.0, 1.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)
-
-        glEnable(GL_TEXTURE_2D)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_back)
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(8.1, 1.0, 10.0)
-        self.model_matrix.add_rotate_y(pi)
-        self.model_matrix.add_scale(20.0, 30.0, 1.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)
-
-
-        glEnable(GL_TEXTURE_2D)
-        glBindTexture(GL_TEXTURE_2D, self.tex_id_skybox)
-        self.model_matrix.load_identity()
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(8.1, 25.0, 1.0)
-        self.model_matrix.add_scale(50.0, 0.5, 50.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
-        self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)
-
-
-
 
         #self.shader.set_solid_color(1.0, 0.0, 0.0)
         glEnable(GL_TEXTURE_2D)
