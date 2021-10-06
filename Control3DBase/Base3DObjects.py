@@ -51,6 +51,22 @@ class Vector:
     def cross(self, other):
         return Vector(self.y*other.z - self.z*other.y, self.z*other.x - self.x*other.z, self.x*other.y - self.y*other.x)
 
+class TextureMap:
+    def __init__(self, diff, norm):
+        self.diffuse = diff
+        self.normal = norm
+
+class Color:
+    def __init__(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
+
+class Material:
+    def __init__(self, diffuse = None, shininess = None):
+        self.diffuse = Color(0.0, 0.0, 0.0) if diffuse is None else diffuse
+        self.shininess = 1 if shininess is None else shininess
+
 class Cube:
     def __init__(self):
         self.texture_array = [

@@ -21,9 +21,9 @@ void main(void)
 	position = u_model_matrix * position;
 	normal = u_model_matrix * normal;
 	//## ADD CODE HERE ##
-	float light_factor_1 = max(dot(normalize(normal), normalize(vec4(1, 2, 3, 0))), 0.0);
-	float light_factor_2 = max(dot(normalize(normal), normalize(vec4(-3, -2, -1, 0))), 0.0);
-	v_uv = (light_factor_1 + light_factor_2) * a_uv; // ### --- Change this vector (pure white) to color variable --- #####
+	//float light_factor_1 = max(dot(normalize(normal), normalize(vec4(1, 2, 3, 0))), 0.0);
+	//float light_factor_2 = max(dot(normalize(normal), normalize(vec4(-3, -2, -1, 0))), 0.0);
+	v_uv = a_uv; // ### --- Change this vector (pure white) to color variable --- #####
 
 	// ### --- Change the projection_view_matrix to separate view and projection matrices --- ###
 	//v_uv = a_uv;
