@@ -106,8 +106,8 @@ class GraphicsProgram3D:
         ]
 
         self.ceilingandfloorlvl1 = [
-            [10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
-            [10.0, 2.0, 2.0, 10.0, 1.0, 10.0, False],
+            [8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
+            [8.1, 2.0, 0.0, 4.0, 1.0, 7.0, False]
         ]
 
         self.ceilingandfloorlvl2 = [
@@ -143,6 +143,7 @@ class GraphicsProgram3D:
         self.ang_wall_max_z = None
         self.ang_wall_min_z = None
 
+
     def check_if_won(self):
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
             self.lvl = 2
@@ -169,6 +170,8 @@ class GraphicsProgram3D:
         while self.t > 0:
             time.sleep(1)
             self.t -= 1
+
+
 
     def collison_check(self):
         if self.lvl == 1:
@@ -220,9 +223,6 @@ class GraphicsProgram3D:
                             return True
                     else:
                         self.collisionAngle = False
-
-
-
 
 
     def load_texture(self, image):
@@ -287,8 +287,8 @@ class GraphicsProgram3D:
             quit()
         else:
             self.white_background = False
-        #if self.lvl == 1:
-            #pygame.mixer.Sound.play(self.soundtrack_sound)
+        if self.lvl == 1:
+            pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
         self.check_if_died()
         self.collison_check()
@@ -297,7 +297,7 @@ class GraphicsProgram3D:
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_FRAMEBUFFER_SRGB)
         #glEnable(GL_CULL_FACE)
-        glCullFace(GL_BACK)
+        #glCullFace(GL_BACK)
         if self.white_background:
             glClearColor(1.0, 1.0, 1.0, 1.0)
         else:
@@ -332,7 +332,6 @@ class GraphicsProgram3D:
         self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)'''
         glEnable(GL_TEXTURE_2D)
-        glColor3f(1, 1, 1)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_floorandceiling)
         if self.lvl == 1:
             for index in self.ceilingandfloorlvl1:
@@ -345,7 +344,7 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)
+
 
         if self.lvl == 2:
             for index in self.ceilingandfloorlvl2:
@@ -467,9 +466,9 @@ class GraphicsProgram3D:
                     if event.key == K_g:
                         self.G_key_down = False
 
-            
             self.update()
             self.display()
+
 
         #OUT OF GAME LOOP
         pygame.quit()
