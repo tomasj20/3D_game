@@ -48,13 +48,16 @@ class Shader3D:
         self.globalLightColor     = glGetUniformLocation(self.renderingProgramID, "u_global_light_color")
 
         self.materialDiffuseLoc  = glGetUniformLocation(self.renderingProgramID, "u_mat_diffuse")
+        self.materialSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_specular")
         self.materialShinyLoc    = glGetUniformLocation(self.renderingProgramID, "u_mat_shiny")
         self.materialEmit        = glGetUniformLocation(self.renderingProgramID, "u_mat_emit")
 
         self.textureLoc = glGetAttribLocation(self.renderingProgramID, "a_uv")
         glEnableVertexAttribArray(self.textureLoc)
 
+        self.useTexture = glGetUniformLocation(self.renderingProgramID, "u_use_texture")
         self.diffuse_texture = glGetUniformLocation(self.renderingProgramID, "u_tex_diffuse")
+        self.specular_texture = glGetUniformLocation(self.renderingProgramID, "u_tex_specular")
 
         #self.colorLoc = glGetUniformLocation(self.renderingProgramID, "u_color")
 
@@ -65,6 +68,12 @@ class Shader3D:
         except OpenGL.error.Error:
             print(glGetProgramInfoLog(self.renderingProgramID))
             raise
+
+    def set_use_texture(self, f):
+        glUniform1f(self.useTexture, f)
+
+    def set_specular_texture(self, i):
+        glUniform1i(self.specular_texture, i)
 
     def set_diffuse_texture(self, i):
         glUniform1i(self.diffuse_texture, i)
@@ -114,3 +123,6 @@ class Shader3D:
 
     def set_material_diffuse(self, color):
         glUniform4f(self.materialDiffuseLoc, color.r, color.g, color.b, 1.0)
+
+    def set_material_specular(self, color):
+        glUniform4f(self.materialSpecularLoc, color.r, color.g, color.b, 1.0)

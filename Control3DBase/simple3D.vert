@@ -8,9 +8,13 @@ uniform mat4 u_model_matrix;
 uniform mat4 u_view_matrix;
 uniform mat4 u_projection_matrix;
 
-uniform vec4 u_color;
-varying vec4 v_color;  //Leave the varying variables alone to begin with
+varying vec4 v_normal;
+varying vec4 v_s;
+varying vec4 v_h;
+varying vec4 v_position;
 varying vec2 v_uv;
+
+
 
 
 void main(void)
@@ -23,7 +27,9 @@ void main(void)
 	//## ADD CODE HERE ##
 	//float light_factor_1 = max(dot(normalize(normal), normalize(vec4(1, 2, 3, 0))), 0.0);
 	//float light_factor_2 = max(dot(normalize(normal), normalize(vec4(-3, -2, -1, 0))), 0.0);
-	v_uv = a_uv; // ### --- Change this vector (pure white) to color variable --- #####
+	v_normal = normalize(normal);
+	v_position = position;
+	v_uv = a_uv;
 
 	// ### --- Change the projection_view_matrix to separate view and projection matrices --- ###
 	//v_uv = a_uv;

@@ -29,7 +29,12 @@ class GraphicsProgram3D:
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
         self.soundtrack_sound = pygame.mixer.Sound("sounds/soundtrack.wav")
+
+        #Textures
+
         self.tex_id_wall_diffuse = self.load_texture("./textures/wall1.png")
+        self.tex_id_wall_specular = self.load_texture("./textures/wall1.png")
+
         self.tex_id_floorandceiling = self.load_texture("./textures/bruh.png")
         self.projection_matrix = ProjectionMatrix()
         self.fov = pi / 2
@@ -327,6 +332,8 @@ class GraphicsProgram3D:
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
+        self.shader.set_global_light_direction(Point(-0.2, -1.0, -0.3))
+        self.shader.set_global_light_color(Color(0.1, 0.1, 0.1))
 
         '''glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_player)
@@ -359,7 +366,10 @@ class GraphicsProgram3D:
         #self.shader.set_solid_color(1.0, 0.0, 0.0)
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_diffuse)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_specular)
+        self.shader.set_use_texture(1.0)
         self.shader.set_material_diffuse(Color(0.7, 0.7, 0.7))
+        self.shader.set_material_specular(Color(0.5, 0.5, 0.5))
         self.shader.set_material_shiny(10)
         self.shader.set_material_emit(0.0)
         if self.lvl == 2:
@@ -385,9 +395,8 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-
+        self.shader.set_use_texture(0.0)
         glDisable(GL_TEXTURE_2D)
-
         glDisable(GL_BLEND)
         pygame.display.flip()
 

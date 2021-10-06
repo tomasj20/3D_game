@@ -3,14 +3,19 @@ varying vec4 v_position;
 
 varying vec2 v_uv;
 uniform sampler2D u_tex_diffuse;
+uniform sampler2D u_tex_specular;
+
 uniform vec4 u_eye_position;
 
 uniform vec4 u_global_light_direction;
 uniform vec4 u_global_light_color;
 
 uniform vec4 u_mat_diffuse;
+uniform vec4 u_mat_specular;
 uniform float u_mat_shiny;
 uniform float u_mat_emit;
+uniform float u_use_texture;
+
 
 vec4 calculate_directional_light()
 {
@@ -36,13 +41,15 @@ vec4 calculate_directional_light()
 	float phong = max(dot(v_normal, vh), 0.0);
 
     // Combine the values, along with a little bit of ambience.
-	return u_global_light_color * u_mat_diffuse * lambert
-			+ u_global_light_color * pow(phong, u_mat_shiny)
+	return u_global_light_color * texture2D(u_tex_diffuse, v_uv) * lambert
+			+ u_global_light_color * texture2D(u_tex_specular, v_uv) * pow(phong, u_mat_shiny)
 			+ (u_global_light_color * 0.01);
 }
 
 void main(void)
 {
-    gl_FragColor = texture2D(u_tex_diffuse, v_uv);
+
+	gl_FragColor = calculate_directional_light();
+    //gl_FragColor = texture2D(u_tex_diffuse, v_uv);
     //glFragColor = v_color;
 }

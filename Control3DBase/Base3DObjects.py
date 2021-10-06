@@ -52,8 +52,9 @@ class Vector:
         return Vector(self.y*other.z - self.z*other.y, self.z*other.x - self.x*other.z, self.x*other.y - self.y*other.x)
 
 class TextureMap:
-    def __init__(self, diff, norm):
+    def __init__(self, diff, spec, norm):
         self.diffuse = diff
+        self.specular = spec
         self.normal = norm
 
 class Color:
@@ -63,8 +64,9 @@ class Color:
         self.b = b
 
 class Material:
-    def __init__(self, diffuse = None, shininess = None):
+    def __init__(self, diffuse = None, specular = None, shininess = None):
         self.diffuse = Color(0.0, 0.0, 0.0) if diffuse is None else diffuse
+        self.specular = Color(0.0, 0.0, 0.0) if specular is None else specular
         self.shininess = 1 if shininess is None else shininess
 
 class Cube:
