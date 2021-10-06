@@ -125,6 +125,7 @@ class GraphicsProgram3D:
         self.ang_wall_min_z = None
         self.right_collision = False
         self.left_collision = False
+        self.SPACE_key_down = False
 
     def check_if_won(self):
         if self.view_matrix.eye.x >= 8.0 and self.view_matrix.eye.x <= 9 and self.view_matrix.eye.z <= -0.9 and self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
@@ -332,8 +333,12 @@ class GraphicsProgram3D:
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
+
         self.shader.set_global_light_direction(Point(-0.2, -1.0, -0.3))
         self.shader.set_global_light_color(Color(0.1, 0.1, 0.1))
+        #if self.SPACE_key_down:
+        self.shader.set_global_flashlight_direction(Point(self.view_matrix.n.x, self.view_matrix.n.y, self.view_matrix.n.z))
+        self.shader.set_global_flashlight_color(Color(0.5, 0.5, 0.5))
 
         '''glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_player)
@@ -442,6 +447,8 @@ class GraphicsProgram3D:
 
                     if event.key == K_g:
                         self.G_key_down = True
+                    if event.key == K_SPACE:
+                        self.SPACE_key_down = True
 
                 elif event.type == pygame.KEYUP:
                     if event.key == K_UP:
@@ -473,6 +480,9 @@ class GraphicsProgram3D:
 
                     if event.key == K_g:
                         self.G_key_down = False
+
+                    if event.key == K_SPACE:
+                        self.SPACE_key_down = False
 
             
             self.update()

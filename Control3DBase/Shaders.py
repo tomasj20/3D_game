@@ -47,6 +47,10 @@ class Shader3D:
         self.globalLightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_light_direction")
         self.globalLightColor     = glGetUniformLocation(self.renderingProgramID, "u_global_light_color")
 
+
+        self.globalFlashlightColor = glGetUniformLocation(self.renderingProgramID, "u_global_flashlight_color")
+        self.globalFlashlightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_flashlight_direction")
+
         self.materialDiffuseLoc  = glGetUniformLocation(self.renderingProgramID, "u_mat_diffuse")
         self.materialSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_specular")
         self.materialShinyLoc    = glGetUniformLocation(self.renderingProgramID, "u_mat_shiny")
@@ -104,6 +108,12 @@ class Shader3D:
 
     def set_global_light_color(self, rgb):
         glUniform4f(self.globalLightColor, rgb.r, rgb.g, rgb.b, 1.0)
+
+    def set_global_flashlight_direction(self, pos):
+        glUniform4f(self.globalFlashlightDirection, pos.x, pos.y, pos.z, 1.0)
+
+    def set_global_flashlight_color(self, rgb):
+        glUniform4f(self.globalFlashlightColor, rgb.r, rgb.g, rgb.b, 1.0)
 
     def set_material_shiny(self, s):
         glUniform1f(self.materialShinyLoc, s)
