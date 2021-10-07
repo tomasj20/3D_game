@@ -47,7 +47,7 @@ class Shader3D:
         self.globalLightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_light_direction")
         self.globalLightColor     = glGetUniformLocation(self.renderingProgramID, "u_global_light_color")
 
-
+        self.flashlightActive = glGetUniformLocation(self.renderingProgramID, "use_flashlight")
         self.globalFlashlightColor = glGetUniformLocation(self.renderingProgramID, "u_global_flashlight_color")
         self.globalFlashlightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_flashlight_direction")
 
@@ -136,3 +136,6 @@ class Shader3D:
 
     def set_material_specular(self, color):
         glUniform4f(self.materialSpecularLoc, color.r, color.g, color.b, 1.0)
+
+    def set_active_flashlight(self, f):
+        glUniform1f(self.flashlightActive, f)

@@ -24,21 +24,14 @@ void main(void)
 
 	position = u_model_matrix * position;
 	normal = u_model_matrix * normal;
-	//## ADD CODE HERE ##
 	//float light_factor_1 = max(dot(normalize(normal), normalize(vec4(1, 2, 3, 0))), 0.0);
 	//float light_factor_2 = max(dot(normalize(normal), normalize(vec4(-3, -2, -1, 0))), 0.0);
 	v_normal = normalize(normal);
 	v_position = position;
 	v_uv = a_uv;
-
-	// ### --- Change the projection_view_matrix to separate view and projection matrices --- ###
-	//v_uv = a_uv;
 	position = u_view_matrix * position;
 	//eye coordinates
-
-
 	position = u_projection_matrix * position;
 	//clip coordinates
-
 	gl_Position = position;
 }
