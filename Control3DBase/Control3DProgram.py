@@ -37,10 +37,10 @@ class GraphicsProgram3D:
 
         #Textures
 
-        self.tex_id_wall_diffuse = self.load_texture("./textures/wall1.png")
-        self.tex_id_wall_specular = self.load_texture("./textures/wall1.png")
+        self.tex_id_wall_diffuse = self.load_texture("./textures/gravel.jpeg")
+        self.tex_id_wall_specular = self.load_texture("./textures/gravel.jpeg")
 
-        self.tex_id_floorandceiling = self.load_texture("./textures/art.jpg")
+        self.tex_id_floorandceiling = self.load_texture("./textures/gravel.jpeg")
         self.projection_matrix = ProjectionMatrix()
         self.fov = pi / 2
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
@@ -420,12 +420,12 @@ class GraphicsProgram3D:
 
         """"LIGHTS"""
         self.shader.set_global_light_direction(Point(-0.3, -1.0, -0.4))
-        self.shader.set_global_light_color(Color(0.11, 0.11, 0.11))
+        self.shader.set_global_light_color(Color(0.01, 0.01, 0.01))
 
         if self.SPACE_key_down:
             self.shader.set_active_flashlight(1.0)
             self.shader.set_flashlight_direction(self.view_matrix.n)
-            self.shader.set_flashlight_color(Color(1.0, 209/255, 178/255))
+            self.shader.set_flashlight_color(Color(0.9725, 0.7647, 0.4667))
             self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y - 0.1, self.view_matrix.eye.z))
             self.shader.set_flashlight_cutoff(cos((40 + 6.5) * pi/180))
             self.shader.set_flashlight_outer_cutoff(cos((40 + 11.5) * pi/180))
@@ -438,7 +438,7 @@ class GraphicsProgram3D:
             self.shader.set_active_flashlight(0.0)
 
         self.shader.set_light_direction(self.view_matrix.v)
-        self.shader.set_light_color(Color(1.0, 209 / 255, 178 / 255))
+        self.shader.set_light_color(Color(0.9725, 0.7647, 0.4667))
         self.shader.set_light_position(
         Point(self.view_matrix.eye.x, self.view_matrix.eye.y+0.5, self.view_matrix.eye.z))
         self.shader.set_light_cutoff(cos((40 + 6.5) * pi / 180))
