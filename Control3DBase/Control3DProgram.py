@@ -12,11 +12,13 @@ import time
 from Base3DObjects import *
 from Shaders import *
 from Matrices import *
+import os
 
 class GraphicsProgram3D:
     def __init__(self):
         pygame.init()
         pygame.display.set_mode((800,600), pygame.OPENGL|pygame.DOUBLEBUF)
+        pygame.font.init()
 
         self.shader = Shader3D()
         self.shader.use()
@@ -25,9 +27,13 @@ class GraphicsProgram3D:
         self.view_matrix = ViewMatrix()
         self.view_matrix.look(Point(7, 1, 3.5), Point(10, 1.0, 0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
+
+        """Sounds"""
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
         self.soundtrack_sound = pygame.mixer.Sound("sounds/soundtrack.wav")
+        self.flashlight_click = pygame.mixer.Sound("sounds/flashlight.wav")
+
 
         #Textures
 
@@ -42,6 +48,8 @@ class GraphicsProgram3D:
         self.cube = Cube()
         self.scale = Point(1, 1, 1)
         self.clock = pygame.time.Clock()
+
+        self.font = pygame.font.SysFont('./fonts/BubbleShine.ttf', 70)
 
         self.wall_list = [
             #[10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
@@ -76,18 +84,18 @@ class GraphicsProgram3D:
             #[8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
             [10.0, 1.0, 1.0, 0.2, 1.0, 4.0, False],
             [6.2, 1.0, 1.0, 0.2, 1.0, 4.0, False],
-            [6.8, 1.0, 3.0, 0.2, 1.0, 1.0, True],
-            [9.0, 1.0, 3.0, 0.2, 1.0, 2.0, True],
-            [7.2, 1.0, -1.0, 0.2, 1, 2.0, True],
-            [9.5, 1.0, -1.0, 0.2, 1, 1.0, True],
-            [9.3, 1.0, -0.0, 0.2, 1.0, 0.5, True],
-            [7.2, 1.0, -0.0, 0.2, 1, 2.0, True],
+            [6.8, 1.0, 3.0, 1.0, 1.0, 0.2, False],
+            [9.0, 1.0, 3.0, 2.0, 1.0, 0.2, False],
+            [7.2, 1.0, -1.0, 2.0, 1, 0.2, False],
+            [9.5, 1.0, -1.0, 1.0, 1, 0.2, False],
+            [9.3, 1.0, -0.0, 0.5, 1.0, 0.2, False],
+            [7.2, 1.0, -0.0, 2.0, 1, 0.2, False],
             [9.0, 1.0, -0.5, 0.2, 1, 0.8, False],
-            [8.75, 1.0, 1.0, 0.2, 1.0, 1.3, True],
+            [8.75, 1.0, 1.0, 1.3, 1.0, 0.2, False],
             [8.1, 1.0, 0.6, 0.2, 1, 1.0, False],
-            [6.8, 1.0, 2.0, 0.2, 1.0, 1.0, True],
+            [6.8, 1.0, 2.0, 1.0, 1.0, 0.2, False],
             [7.2, 1.0, 1.5, 0.2, 1, 1.0, False],
-            [8.65, 1.0, 2.0, 0.2, 1.0, 1.3, True],
+            [8.65, 1.0, 2.0, 1.3, 1.0, 0.2, False],
             [8.1, 1.0, 2.6, 0.2, 1, 1.0, False],
 
         ]
@@ -99,18 +107,13 @@ class GraphicsProgram3D:
         self.angle = 0
         self.collisionNormal = False
         self.collisionAngle = False
-        self.W_key_down = False
-        self.S_key_down = False
         self.A_key_down = False
         self.D_key_down = False
         self.T_key_down = False
         self.G_key_down = False
         self.UP_key_down = False
         self.DOWN_key_down = False
-        self.RIGHT_key_down = False
-        self.LEFT_key_down = False
         self.falling = False
-        self.white_background = False
         self.check_if_won()
         self.check_if_died()
         self.collison_check()
@@ -130,6 +133,15 @@ class GraphicsProgram3D:
         self.player_pos = self.view_matrix.eye
         self.radius = 0.02
 
+        self.textX1 = 30
+        self.textY1 = 500
+
+        #DIRECTIONS
+        self.SOUTH_WEST = self.view_matrix.n.z >= 0 and self.view_matrix.n.x <= 0
+        self.NORTH_WEST = self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0
+        self.SOUTH_EAST = self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0
+        self.NORTH_EAST = self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0
+
 
     def check_if_won(self):
         if 8.0 <= self.view_matrix.eye.x <= 9 and -0.9 >= self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
@@ -144,11 +156,11 @@ class GraphicsProgram3D:
             quit()
 
     def check_if_died(self):
-        if (self.view_matrix.eye.x >= 10.0 and self.lvl==1) or self.view_matrix.eye.x <= 6 and 4 >= self.view_matrix.eye.z >= -3 and self.lvl == 1:
+        if (self.view_matrix.eye.x >= 10.0 and self.lvl == 1) or self.view_matrix.eye.x <= 6 and 4 >= self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
         if self.view_matrix.eye.z >= 5.0 and self.lvl == 1:
             self.falling = True
-        if (self.view_matrix.eye.x >= 30.0 and self.lvl==2) or self.view_matrix.eye.x <= 5.0 and 10 >= self.view_matrix.eye.z >= -10 and self.lvl == 2:
+        if (self.view_matrix.eye.x >= 30.0 and self.lvl == 2) or self.view_matrix.eye.x <= 5.0 and 10 >= self.view_matrix.eye.z >= -10 and self.lvl == 2:
             self.falling = True
         if self.view_matrix.eye.z >= 7.3 and self.lvl == 2:
             self.falling = True
@@ -162,36 +174,34 @@ class GraphicsProgram3D:
                     self.wall_max_x = item[0] + item[3] / 2
                     self.wall_min_z = item[2] - item[5] / 2
                     self.wall_max_z = item[2] + item[5] / 2
+                    #V1 = Vector([self.view_matrix.eye.x, self.view_matrix.eye.z])
+                    #V2 = Vector([item[0], item[2]])  # Use a coordinate that you know is on the line
+                    #n = Vector([self])  # The n value of the sloped line
                     if self.wall_min_x-0.05 <= self.view_matrix.eye.x <= self.wall_max_x+0.05:
                         if self.wall_min_z-0.05 <= self.view_matrix.eye.z <= self.wall_max_z+0.05:
-                            #if self.wall_min_z - 0.05 <= self.view_matrix.eye.z <= self.wall_max_z and self.wall_min_x + 0.05 >= self.view_matrix.eye.x >= self.wall_min_x:
-                                #self.min_collision = True
-                            """if self.wall_max_z >= self.view_matrix.eye.z >= self.wall_min_z:
-                                if self.wall_min_x - 0.05 <= self.view_matrix.eye.x <= self.wall_min_x:
-                                    self.collisionAngle = True
-                            else:"""
                             self.collisionNormal = True
                             return True
                     else:
                         self.collisionNormal = False
-                        #self.right_collision = False
-                        #self.left_collision = False
-                if item[6]:
+                """if item[6]:
                     self.ang_wall_max_x = item[0] + item[5] / 2
                     self.ang_wall_min_x = item[0] - item[5] / 2
                     self.ang_wall_max_z = item[2] + item[3] / 2
                     self.ang_wall_min_z = item[2] - item[3] / 2
-                    """player_min_x = self.player_pos.x - self.radius
+                    player_min_x = self.player_pos.x - self.radius
                     player_max_x = self.player_pos.x + self.radius
                     player_min_z = self.player_pos.z - self.radius
                     player_max_z = self.player_pos.z + self.radius
-                    scale_player = self.radius * 2"""
+                    scale_player = self.radius * 2
                     if self.ang_wall_min_x-0.05 <= self.view_matrix.eye.x <= self.ang_wall_max_x+0.05:
                         if self.ang_wall_min_z-0.05 <= self.view_matrix.eye.z <= self.ang_wall_max_z+0.05:
-                            self.collisionAngle = True
+                            if self.wall_min_x -0.1 >= self.view_matrix.eye.x >= self.wall_min_x:
+                                self.collisionNormal = True
+                            else:
+                                self.collisionAngle = True
                             return True
                     else:
-                        self.collisionAngle = False
+                        self.collisionAngle = False"""
         if self.lvl == 2:
             for item in self.wall_list:
                 if not item[6]:
@@ -228,7 +238,6 @@ class GraphicsProgram3D:
         width = texture_surface.get_width()
         height = texture_surface.get_height()
 
-        # glEnable(GL_TEXTURE_2D)
         texid = glGenTextures(1)
 
         glBindTexture(GL_TEXTURE_2D, texid)
@@ -247,23 +256,10 @@ class GraphicsProgram3D:
 
 
         self.angle += pi * delta_time
-        # if angle > 2 * pi:
-        #     angle -= (2 * pi)
-        """if self.W_key_down:
-            self.view_matrix.pitch(-pi * delta_time)
-        if self.S_key_down:
-            self.view_matrix.pitch(pi * delta_time)"""
-        #forward = Vector(self.view_matrix.n.x, self.view_matrix.n.y, self.view_matrix.n.z)
-        #for cube in self.wall_list2:
-            #direction = self.view_matrix.eye - Point(cube[0::2])
-            # obj_dir.normalize()
-            #theta = direction.dot(forward)
+
         if self.A_key_down:
-            #self.view_matrix.roll(pi * delta_time)
             self.view_matrix.yaw(-120*delta_time)
         if self.D_key_down:
-            #self.view_matrix.slide(1 * delta_time, 0, 0)
-            #self.view_matrix.roll(-pi * delta_time)
             self.view_matrix.yaw(120 * delta_time)
         if self.T_key_down:
             self.fov -= 0.25 * delta_time
@@ -273,40 +269,38 @@ class GraphicsProgram3D:
             self.view_matrix.slide(0, 0, -1.5 * delta_time)
         if self.DOWN_key_down and self.collisionNormal and self.collisionAngle:
             self.view_matrix.slide(0, 0, 3 * delta_time)
-        """if self.RIGHT_key_down and not self.right_collision:
-            self.view_matrix.slide(3 * delta_time, 0, 0)
-        if self.LEFT_key_down and not self.left_collision:
-            self.view_matrix.slide(-3 * delta_time, 0, 0)"""
         if self.falling:
             pygame.mixer.Sound.play(self.crash_sound)
             self.view_matrix.eye.y -= 3 * delta_time
 
             """check for direction of player and make him slide accordingly"""
         if self.UP_key_down:
-            if self.collisionNormal and self.view_matrix.n.z >= 0 and self.view_matrix.n.x <= 0:
-                self.view_matrix.slide(-1.5*delta_time, 0, 0)
-            if self.collisionNormal and self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0:
-                self.view_matrix.slide(1.5*delta_time, 0, 0)
-            if self.collisionNormal and self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0:
-                self.view_matrix.slide(1.5*delta_time, 0, 0)
-            if self.collisionNormal and self.view_matrix.n.z <= 0 and self.view_matrix.n.x >= 0:
-                self.view_matrix.slide(-1.5*delta_time, 0, 0)
-            if self.collisionAngle and self.view_matrix.n.x <= 0 and self.view_matrix.n.z >= 0:
-                self.view_matrix.slide(1.5*delta_time, 0, 0)
-            if self.collisionAngle and self.view_matrix.n.x <= 0 and self.view_matrix.n.z <= 0:
-                self.view_matrix.slide(-1.5 * delta_time, 0, 0)
-            if self.collisionAngle and self.view_matrix.n.x >= 0 and self.view_matrix.n.z >= 0:
-                self.view_matrix.slide(-1.5 * delta_time, 0, 0)
-            if self.collisionAngle and self.view_matrix.n.x >= 0 and self.view_matrix.n.z <= 0:
-                self.view_matrix.slide(1.5 * delta_time, 0, 0)
+            if self.collisionNormal and self.NORTH_EAST:
+                if self.wall_min_x >= self.view_matrix.eye.x >= self.wall_min_x-0.2:
+                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+
+            if self.collisionNormal and self.NORTH_WEST:
+                if self.wall_max_x <= self.view_matrix.eye.x <= self.wall_max_x+0.2:
+                    self.view_matrix.slide(-1.5 * delta_time, 0, 0)
+                else:
+                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+            if self.collisionNormal and self.SOUTH_EAST:
+                if self.wall_min_x >= self.view_matrix.eye.x >= self.wall_min_x - 0.2:
+                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+                else:
+                    self.view_matrix.slide(-1.5 * delta_time, 0, 0)
+            if self.collisionNormal and self.SOUTH_WEST:
+                if self.wall_max_x >= self.view_matrix.eye.x >= self.wall_max_x + 0.2:
+                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+                else:
+                    self.view_matrix.slide(-1.5 * delta_time, 0, 0)
+
 
             """If player is falling, the game ends"""
         if self.view_matrix.eye.y <= -4:
             pygame.quit()
             quit()
             print("You died")
-        else:
-            self.white_background = False
         #if self.lvl == 1:
             #pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
@@ -316,12 +310,9 @@ class GraphicsProgram3D:
     def display(self):
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_FRAMEBUFFER_SRGB)
-        #glEnable(GL_CULL_FACE)
-        #glCullFace(GL_BACK)
-        if self.white_background:
-            glClearColor(1.0, 1.0, 1.0, 1.0)
-        else:
-            glClearColor(0.0, 0.0, 0.0, 1.0)
+        glLoadIdentity()
+        glMatrixMode(GL_PROJECTION)
+        glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
         glViewport(0, 0, 800, 600)
@@ -329,20 +320,44 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
+        textSurface = self.font.render(str("Hallo"), True, (255, 255, 66, 255), (0, 66, 0, 255))
+        textData = pygame.image.tostring(textSurface, "RGBA", True)
+        glWindowPos2d(self.textX1, self.textY1)
+        glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
 
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
 
-        self.shader.set_global_light_direction(Point(-0.2, -1.0, -0.3))
-        self.shader.set_global_light_color(Color(0.1, 0.1, 0.1))
+        """"LIGHTS"""
+        self.shader.set_global_light_direction(Point(-0.3, -1.0, -0.4))
+        self.shader.set_global_light_color(Color(0.01, 0.01, 0.01))
 
         if self.SPACE_key_down:
             self.shader.set_active_flashlight(1.0)
-            self.shader.set_global_flashlight_direction(Point(self.view_matrix.n.x, self.view_matrix.n.y, self.view_matrix.n.z))
-            self.shader.set_global_flashlight_color(Color(0.1, 0.1, 0.1))
+            self.shader.set_flashlight_direction(self.view_matrix.n)
+            self.shader.set_flashlight_color(Color(1.0, 209/255, 178/255))
+            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y * 0.5, self.view_matrix.eye.z))
+            self.shader.set_flashlight_cutoff(cos((40 + 6.5) * pi/180))
+            self.shader.set_flashlight_outer_cutoff(cos((40 + 11.5) * pi/180))
+            self.shader.set_flashlight_constant(1.0)
+            self.shader.set_flashlight_linear(0.14)
+            self.shader.set_flashlight_quad(0.07)
+
+
         if not self.SPACE_key_down:
             self.shader.set_active_flashlight(0.0)
+
+        self.shader.set_light_direction(self.view_matrix.v)
+        self.shader.set_light_color(Color(1.0, 209 / 255, 178 / 255))
+        self.shader.set_light_position(
+        Point(self.view_matrix.eye.x, self.view_matrix.eye.y+0.5, self.view_matrix.eye.z))
+        self.shader.set_light_cutoff(cos((40 + 6.5) * pi / 180))
+        self.shader.set_light_outer_cutoff(cos((40 + 11.5) * pi / 180))
+        self.shader.set_light_constant(1.0)
+        self.shader.set_light_linear(0.14)
+        self.shader.set_light_quad(0.07)
+
 
         '''glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_player)
@@ -372,11 +387,9 @@ class GraphicsProgram3D:
                 self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)"""
 
-        #self.shader.set_solid_color(1.0, 0.0, 0.0)
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_diffuse)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_specular)
-        self.shader.set_use_texture(1.0)
         self.shader.set_material_diffuse(Color(0.7, 0.7, 0.7))
         self.shader.set_material_specular(Color(0.5, 0.5, 0.5))
         self.shader.set_material_shiny(10)
@@ -404,7 +417,7 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-        self.shader.set_use_texture(0.0)
+
         glDisable(GL_TEXTURE_2D)
         glDisable(GL_BLEND)
         pygame.display.flip()
@@ -428,18 +441,6 @@ class GraphicsProgram3D:
                     if event.key == K_DOWN:
                         self.DOWN_key_down = True
 
-                    if event.key == K_RIGHT:
-                        self.RIGHT_key_down = True
-
-                    if event.key == K_LEFT:
-                        self.LEFT_key_down = True
-                        
-                    if event.key == K_w:
-                        self.W_key_down = True
-
-                    if event.key == K_s:
-                        self.S_key_down = True
-
                     if event.key == K_a:
                         self.A_key_down = True
 
@@ -453,6 +454,7 @@ class GraphicsProgram3D:
                         self.G_key_down = True
 
                     if event.key == K_SPACE:
+                        pygame.mixer.Sound.play(self.flashlight_click)
                         self.SPACE_key_down = True
 
                 elif event.type == pygame.KEYUP:
@@ -461,18 +463,6 @@ class GraphicsProgram3D:
 
                     if event.key == K_DOWN:
                         self.DOWN_key_down = False
-
-                    if event.key == K_RIGHT:
-                        self.RIGHT_key_down = False
-
-                    if event.key == K_LEFT:
-                        self.LEFT_key_down = False
-
-                    if event.key == K_w:
-                        self.W_key_down = False
-
-                    if event.key == K_s:
-                        self.S_key_down = False
 
                     if event.key == K_a:
                         self.A_key_down = False

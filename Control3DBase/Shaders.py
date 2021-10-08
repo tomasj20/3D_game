@@ -47,9 +47,25 @@ class Shader3D:
         self.globalLightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_light_direction")
         self.globalLightColor     = glGetUniformLocation(self.renderingProgramID, "u_global_light_color")
 
+        self.lightPosition = glGetUniformLocation(self.renderingProgramID, "u_light_position")
+        self.lightColor = glGetUniformLocation(self.renderingProgramID, "u_light_color")
+        self.lightDirection = glGetUniformLocation(self.renderingProgramID, "u_light_direction")
+        self.lightCutoff       = glGetUniformLocation(self.renderingProgramID, "u_light_cutoff")
+        self.lightConst  = glGetUniformLocation(self.renderingProgramID, "u_light_constant")
+        self.lightLinear    = glGetUniformLocation(self.renderingProgramID, "u_light_linear")
+        self.lightQuad = glGetUniformLocation(self.renderingProgramID, "u_light_quad")
+        self.lightOuterCutoff  = glGetUniformLocation(self.renderingProgramID, "u_light_outer_cutoff")
+
+        self.flashlightPosition = glGetUniformLocation(self.renderingProgramID, "u_flashlight_position")
         self.flashlightActive = glGetUniformLocation(self.renderingProgramID, "use_flashlight")
-        self.globalFlashlightColor = glGetUniformLocation(self.renderingProgramID, "u_global_flashlight_color")
-        self.globalFlashlightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_flashlight_direction")
+        self.flashlightColor = glGetUniformLocation(self.renderingProgramID, "u_flashlight_color")
+        self.flashlightDirection = glGetUniformLocation(self.renderingProgramID, "u_flashlight_direction")
+        self.flashlightCutoff       = glGetUniformLocation(self.renderingProgramID, "u_flashlight_cutoff")
+        self.flashlightConst  = glGetUniformLocation(self.renderingProgramID, "u_flashlight_constant")
+        self.flashlightLinear    = glGetUniformLocation(self.renderingProgramID, "u_flashlight_linear")
+        self.flashlightQuad = glGetUniformLocation(self.renderingProgramID, "u_flashlight_quad")
+        self.flashlightOuterCutoff  = glGetUniformLocation(self.renderingProgramID, "u_flashlight_outer_cutoff")
+
 
         self.materialDiffuseLoc  = glGetUniformLocation(self.renderingProgramID, "u_mat_diffuse")
         self.materialSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_specular")
@@ -59,7 +75,7 @@ class Shader3D:
         self.textureLoc = glGetAttribLocation(self.renderingProgramID, "a_uv")
         glEnableVertexAttribArray(self.textureLoc)
 
-        self.useTexture = glGetUniformLocation(self.renderingProgramID, "u_use_texture")
+
         self.diffuse_texture = glGetUniformLocation(self.renderingProgramID, "u_tex_diffuse")
         self.specular_texture = glGetUniformLocation(self.renderingProgramID, "u_tex_specular")
 
@@ -73,8 +89,7 @@ class Shader3D:
             print(glGetProgramInfoLog(self.renderingProgramID))
             raise
 
-    def set_use_texture(self, f):
-        glUniform1f(self.useTexture, f)
+
 
     def set_specular_texture(self, i):
         glUniform1i(self.specular_texture, i)
@@ -109,11 +124,53 @@ class Shader3D:
     def set_global_light_color(self, rgb):
         glUniform4f(self.globalLightColor, rgb.r, rgb.g, rgb.b, 1.0)
 
-    def set_global_flashlight_direction(self, pos):
-        glUniform4f(self.globalFlashlightDirection, pos.x, pos.y, pos.z, 1.0)
+    def set_flashlight_position(self, pos):
+        glUniform4f(self.flashlightPosition, pos.x, pos.y, pos.z, 1.0)
 
-    def set_global_flashlight_color(self, rgb):
-        glUniform4f(self.globalFlashlightColor, rgb.r, rgb.g, rgb.b, 1.0)
+    def set_flashlight_direction(self, pos):
+        glUniform4f(self.flashlightDirection, pos.x, pos.y, pos.z, 1.0)
+
+    def set_flashlight_color(self, rgb):
+        glUniform4f(self.flashlightColor, rgb.r, rgb.g, rgb.b, 1.0)
+
+    def set_flashlight_cutoff(self, f):
+        glUniform1f(self.flashlightCutoff, f)
+
+    def set_flashlight_outer_cutoff(self, f):
+        glUniform1f(self.flashlightOuterCutoff, f)
+
+    def set_flashlight_constant(self, f):
+        glUniform1f(self.flashlightConst, f)
+
+    def set_flashlight_linear(self, f):
+        glUniform1f(self.flashlightLinear, f)
+
+    def set_flashlight_quad(self, f):
+        glUniform1f(self.flashlightQuad, f)
+
+    def set_light_position(self, pos):
+        glUniform4f(self.lightPosition, pos.x, pos.y, pos.z, 1.0)
+
+    def set_light_direction(self, pos):
+        glUniform4f(self.lightDirection, pos.x, pos.y, pos.z, 1.0)
+
+    def set_light_color(self, rgb):
+        glUniform4f(self.lightColor, rgb.r, rgb.g, rgb.b, 1.0)
+
+    def set_light_cutoff(self, f):
+        glUniform1f(self.lightCutoff, f)
+
+    def set_light_outer_cutoff(self, f):
+        glUniform1f(self.lightOuterCutoff, f)
+
+    def set_light_constant(self, f):
+        glUniform1f(self.lightConst, f)
+
+    def set_light_linear(self, f):
+        glUniform1f(self.lightLinear, f)
+
+    def set_light_quad(self, f):
+        glUniform1f(self.lightQuad, f)
 
     def set_material_shiny(self, s):
         glUniform1f(self.materialShinyLoc, s)
