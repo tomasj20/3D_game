@@ -40,7 +40,7 @@ class GraphicsProgram3D:
         self.tex_id_wall_diffuse = self.load_texture("./textures/wall1.png")
         self.tex_id_wall_specular = self.load_texture("./textures/wall1.png")
 
-        self.tex_id_floorandceiling = self.load_texture("./textures/bruh.png")
+        self.tex_id_floorandceiling = self.load_texture("./textures/art.jpg")
         self.projection_matrix = ProjectionMatrix()
         self.fov = pi / 2
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
@@ -55,29 +55,29 @@ class GraphicsProgram3D:
             #[10.0, 0.0, 2.0, 10.0, 1.0, 10.0, False],
             [15.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
             [5.0, 1.0, 1.0, 0.2, 1.0, 8.0, False],
-            [8.9, 1.0, 5.0, 0.2, 1.0, 8.0, True],
-            [14.5, 1.0, 5.0, 0.2, 1.0, 1.2, True],
-            [11.1, 1.0, -3.1, 0.2, 1, 8.0, True],
-            [5.4, 1.0, -3.1, 0.2, 1.0, 1.0, True],
-            [8.0, 1.0, -1.5, 0.2, 1.0, 6.0, True],
+            [8.9, 1.0, 5.0, 8.0, 1.0, 0.2, False],
+            [14.5, 1.0, 5.0, 1.2, 1.0, 0.2, False],
+            [11.1, 1.0, -3.1, 8.0, 1, 0.2, False],
+            [5.4, 1.0, -3.1, 1.0, 1.0, 0.2, False],
+            [8.0, 1.0, -1.5, 6.0, 1.0, 0.2, False],
             [6.0, 1.0, 1.4, 0.2, 1.0, 4.0, False],
-            [5.8, 1.0, 4.0, 0.2, 1.0, 1.5, True],
+            [5.8, 1.0, 4.0, 1.5, 1.0, 0.2, False],
             [7.4, 1.0, 4.0, 0.2, 1.0, 2.0, False],
-            [10.5, 1.0, 3.1, 0.2, 1.0, 6.5, True],
-            [11.2, 1.0, 4.1, 0.2, 1.0, 5.5, True],
+            [10.5, 1.0, 3.1, 6.5, 1.0, 0.2, False],
+            [11.2, 1.0, 4.1, 5.5, 1.0, 0.2, False],
             [14.0, 1.0, 4.5, 0.2, 1.0, 1.0, False],
             [13.2, 1.0, -0.8, 0.2, 1.0, 4.5, False],
-            [10.2, 1.0, 1.4, 0.2, 1.0, 6.0, True],
+            [10.2, 1.0, 1.4, 6.0, 1.0, 0.2, False],
             [12.0, 1.0, -0.2, 0.2, 1.0, 3.0, False],
             [7.3, 1.0, 0.4, 0.2, 1.0, 1.9, False],
             [8.3, 1.0, -0.6, 0.2, 1.0, 2.0, False],
             [10.9, 1.0, -0.6, 0.2, 1.0, 2.0, False],
-            [6.7, 1.0, -0.5, 0.2, 1.0, 1.4, True],
-            [9.6, 1.0, 0.5, 0.2, 1.0, 2.8, True],
+            [6.7, 1.0, -0.5, 1.4, 1.0, 0.2, False],
+            [9.6, 1.0, 0.5, 2.8, 1.0, 0.2, False],
             [14.0, 1.0, 0.2, 0.2, 1.0, 4.3, False],
-            [13.0, 1.0, 2.3, 0.2, 1.0, 3.8, True],
+            [13.0, 1.0, 2.3, 3.8, 1.0, 0.2, False],
             [10.0, 1.0, 2.7, 0.2, 1.0, 1.0, False],
-            [8.7, 1.0, 2.3, 0.2, 1.0, 2.5, True],
+            [8.7, 1.0, 2.3, 2.5, 1.0, 0.2, False],
             #[6.6, 1.0, -5.1, 0.2, 1.0, 1.123, True],
         ]
         self.wall_list2 = [
@@ -88,7 +88,7 @@ class GraphicsProgram3D:
             [9.0, 1.0, 3.0, 2.0, 1.0, 0.2, False],
             [7.2, 1.0, -1.0, 2.0, 1, 0.2, False],
             [9.5, 1.0, -1.0, 1.0, 1, 0.2, False],
-            [9.3, 1.0, -0.0, 0.5, 1.0, 0.2, False],
+            [9.15, 1.0, -0.0, 0.5, 1.0, 0.2, False],
             [7.2, 1.0, -0.0, 2.0, 1, 0.2, False],
             [9.0, 1.0, -0.5, 0.2, 1, 0.8, False],
             [8.75, 1.0, 1.0, 1.3, 1.0, 0.2, False],
@@ -105,8 +105,15 @@ class GraphicsProgram3D:
             [8.1, 2.0, 0.0, 4.0, 1.0, 7.0, False],
         ]
         self.angle = 0
-        self.collisionNormal = False
-        self.collisionAngle = False
+
+
+
+        self.collisionLeftWall = False
+        self.collisionRightWall = False
+        self.collisionTopWall = False
+        self.collisionBottomWall = False
+
+
         self.A_key_down = False
         self.D_key_down = False
         self.T_key_down = False
@@ -117,14 +124,6 @@ class GraphicsProgram3D:
         self.check_if_won()
         self.check_if_died()
         self.collison_check()
-        self.wall_min_x = None
-        self.wall_max_x = None
-        self.wall_max_z = None
-        self.wall_min_z = None
-        self.ang_wall_min_x = None
-        self.ang_wall_max_x = None
-        self.ang_wall_max_z = None
-        self.ang_wall_min_z = None
         self.right_collision = False
         self.left_collision = False
         self.SPACE_key_down = False
@@ -141,6 +140,8 @@ class GraphicsProgram3D:
         self.NORTH_WEST = self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0
         self.SOUTH_EAST = self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0
         self.NORTH_EAST = self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0
+
+        self.collision = self.collisionLeftWall and self.collisionBottomWall and self.collisionTopWall and self.collisionBottomWall
 
 
     def check_if_won(self):
@@ -170,11 +171,42 @@ class GraphicsProgram3D:
         if self.lvl == 1:
             for item in self.wall_list2:
                 if not item[6]:
-                    self.wall_min_x = item[0] - item[3] / 2
-                    self.wall_max_x = item[0] + item[3] / 2
-                    self.wall_min_z = item[2] - item[5] / 2
-                    self.wall_max_z = item[2] + item[5] / 2
-                    #V1 = Vector([self.view_matrix.eye.x, self.view_matrix.eye.z])
+                    wall_min_x = item[0] - item[3] / 2
+                    wall_max_x = item[0] + item[3] / 2
+                    wall_min_z = item[2] - item[5] / 2
+                    wall_max_z = item[2] + item[5] / 2
+
+
+                    if wall_max_x+0.2 >= self.view_matrix.eye.x >= wall_max_x+0.1:
+                        if wall_min_z-0.1 <= self.view_matrix.eye.z <= wall_max_z+0.1:
+                            self.collisionRightWall = True
+                            return True
+                    else:
+                        self.collisionRightWall = False
+
+                    if wall_min_x-0.2 <= self.view_matrix.eye.x <= wall_min_x-0.1:
+                        if wall_min_z-0.2 <= self.view_matrix.eye.z <= wall_max_z+0.1:
+                            self.collisionLeftWall = True
+                            return True
+                    else:
+                        self.collisionLeftWall = False
+
+                    if wall_min_z-0.2 <= self.view_matrix.eye.z <= wall_min_z-0.1:
+                        if wall_min_x-0.1 <= self.view_matrix.eye.x <= wall_max_x+0.1:
+                            self.collisionTopWall = True
+                            return True
+                    else:
+                        self.collisionTopWall = False
+
+                    if wall_max_z+0.2 >= self.view_matrix.eye.z >= wall_max_z+0.1:
+                        if wall_min_x-0.1 <= self.view_matrix.eye.x <= wall_max_x+0.1:
+                            self.collisionBottomWall = True
+                            return True
+                    else:
+                        self.collisionBottomWall = False
+
+
+                    """#V1 = Vector([self.view_matrix.eye.x, self.view_matrix.eye.z])
                     #V2 = Vector([item[0], item[2]])  # Use a coordinate that you know is on the line
                     #n = Vector([self])  # The n value of the sloped line
                     if self.wall_min_x-0.05 <= self.view_matrix.eye.x <= self.wall_max_x+0.05:
@@ -182,7 +214,7 @@ class GraphicsProgram3D:
                             self.collisionNormal = True
                             return True
                     else:
-                        self.collisionNormal = False
+                        self.collisionNormal = False"""
                 """if item[6]:
                     self.ang_wall_max_x = item[0] + item[5] / 2
                     self.ang_wall_min_x = item[0] - item[5] / 2
@@ -205,30 +237,38 @@ class GraphicsProgram3D:
         if self.lvl == 2:
             for item in self.wall_list:
                 if not item[6]:
-                    self.wall_min_x = item[0] - item[3] / 2
-                    self.wall_max_x = item[0] + item[3] / 2
-                    self.wall_min_z = item[2] - item[5] / 2
-                    self.wall_max_z = item[2] + item[5] / 2
-                    if self.wall_min_x-0.05 <= self.view_matrix.eye.x <= self.wall_max_x+0.05:
-                        if self.wall_min_z-0.05 <= self.view_matrix.eye.z <= self.wall_max_z+0.05:
-                            self.collisionNormal = True
+                    wall_min_x = item[0] - item[3] / 2
+                    wall_max_x = item[0] + item[3] / 2
+                    wall_min_z = item[2] - item[5] / 2
+                    wall_max_z = item[2] + item[5] / 2
+
+                    if wall_max_x + 0.2 >= self.view_matrix.eye.x >= wall_max_x + 0.1:
+                        if wall_min_z - 0.1 <= self.view_matrix.eye.z <= wall_max_z + 0.1:
+                            self.collisionRightWall = True
                             return True
                     else:
-                        self.collisionNormal = False
-                if item[6]:
-                    self.ang_wall_max_x = item[0] + item[5] / 2
-                    self.ang_wall_min_x = item[0] - item[5] / 2
-                    self.ang_wall_max_z = item[2] + item[3] / 2
-                    self.ang_wall_min_z = item[2] - item[3] / 2
-                    if self.ang_wall_min_x-0.05 <= self.view_matrix.eye.x <= self.ang_wall_max_x+0.05:
-                        if self.ang_wall_min_z-0.05 <= self.view_matrix.eye.z <= self.ang_wall_max_z+0.05:
-                            self.collisionAngle = True
+                        self.collisionRightWall = False
+
+                    if wall_min_x - 0.2 <= self.view_matrix.eye.x <= wall_min_x - 0.1:
+                        if wall_min_z - 0.2 <= self.view_matrix.eye.z <= wall_max_z + 0.1:
+                            self.collisionLeftWall = True
                             return True
                     else:
-                        self.collisionAngle = False
+                        self.collisionLeftWall = False
 
+                    if wall_min_z - 0.2 <= self.view_matrix.eye.z <= wall_min_z - 0.1:
+                        if wall_min_x - 0.1 <= self.view_matrix.eye.x <= wall_max_x + 0.1:
+                            self.collisionTopWall = True
+                            return True
+                    else:
+                        self.collisionTopWall = False
 
-
+                    if wall_max_z + 0.2 >= self.view_matrix.eye.z >= wall_max_z + 0.1:
+                        if wall_min_x - 0.1 <= self.view_matrix.eye.x <= wall_max_x + 0.1:
+                            self.collisionBottomWall = True
+                            return True
+                    else:
+                        self.collisionBottomWall = False
 
 
     def load_texture(self, image):
@@ -265,9 +305,10 @@ class GraphicsProgram3D:
             self.fov -= 0.25 * delta_time
         if self.G_key_down:
             self.fov += 0.25 * delta_time
-        if self.UP_key_down and not self.collisionNormal and not self.collisionAngle:
+        if self.UP_key_down and not self.collisionLeftWall and not self.collisionRightWall and not self.collisionTopWall and not self.collisionBottomWall:
             self.view_matrix.slide(0, 0, -1.5 * delta_time)
-        if self.DOWN_key_down and self.collisionNormal and self.collisionAngle:
+
+        if self.DOWN_key_down and self.collision:
             self.view_matrix.slide(0, 0, 3 * delta_time)
         if self.falling:
             pygame.mixer.Sound.play(self.crash_sound)
@@ -275,25 +316,78 @@ class GraphicsProgram3D:
 
             """check for direction of player and make him slide accordingly"""
         if self.UP_key_down:
-            if self.collisionNormal and self.NORTH_EAST:
-                if self.wall_min_x >= self.view_matrix.eye.x >= self.wall_min_x-0.2:
-                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+            if self.collisionRightWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(1 * delta_time, 0, 0)
+
+            if self.collisionRightWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionRightWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(-1 * delta_time, 0, 0)
+
+            if self.collisionRightWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionLeftWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(1 * delta_time, 0, 0)
+
+            if self.collisionLeftWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionLeftWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(-1 * delta_time, 0, 0)
+
+            if self.collisionLeftWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionBottomWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(-1 * delta_time, 0, 0)
+
+            if self.collisionBottomWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionBottomWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(1 * delta_time, 0, 0)
+
+            if self.collisionBottomWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionTopWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(1 * delta_time, 0, 0)
+
+            if self.collisionTopWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+            if self.collisionTopWall and self.view_matrix.n.z <= 0 and self.view_matrix.n.x <= 0:
+                self.view_matrix.slide(-1 * delta_time, 0, 0)
+
+            if self.collisionTopWall and self.view_matrix.n.z >= 0 and self.view_matrix.n.x >= 0:
+                self.view_matrix.slide(0, 0, -1*delta_time)
+
+
+            """if self.collisionNormal and self.NORTH_EAST:
+                if self.wall_min_x >= self.view_matrix.eye.x >= self.wall_max_z:
+                    self.view_matrix.slide(-1.0 * delta_time, 0, 0)
+                else:
+                    self.view_matrix.slide(1.0 * delta_time, 0, 0)
 
             if self.collisionNormal and self.NORTH_WEST:
-                if self.wall_max_x <= self.view_matrix.eye.x <= self.wall_max_x+0.2:
-                    self.view_matrix.slide(-1.5 * delta_time, 0, 0)
+                if self.wall_max_x <= self.view_matrix.eye.x <= self.wall_max_x+0.1:
+                    self.view_matrix.slide(-1.0 * delta_time, 0, 0)
                 else:
-                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+                    self.view_matrix.slide(1.0 * delta_time, 0, 0)
+
             if self.collisionNormal and self.SOUTH_EAST:
-                if self.wall_min_x >= self.view_matrix.eye.x >= self.wall_min_x - 0.2:
-                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+                if self.wall_min_x >= self.view_matrix.eye.x >= self.wall_min_x - 0.1:
+                    self.view_matrix.slide(1.0 * delta_time, 0, 0)
                 else:
-                    self.view_matrix.slide(-1.5 * delta_time, 0, 0)
+                    self.view_matrix.slide(-1.0 * delta_time, 0, 0)
+
             if self.collisionNormal and self.SOUTH_WEST:
-                if self.wall_max_x >= self.view_matrix.eye.x >= self.wall_max_x + 0.2:
-                    self.view_matrix.slide(1.5 * delta_time, 0, 0)
+                if self.wall_max_x >= self.view_matrix.eye.x >= self.wall_max_x + 0.1:
+                    self.view_matrix.slide(1.0 * delta_time, 0, 0)
                 else:
-                    self.view_matrix.slide(-1.5 * delta_time, 0, 0)
+                    self.view_matrix.slide(-1.0 * delta_time, 0, 0)"""
 
 
             """If player is falling, the game ends"""
@@ -320,24 +414,19 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(self.fov, 800 / 600, 0.01, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
-        textSurface = self.font.render(str("Hallo"), True, (255, 255, 66, 255), (0, 66, 0, 255))
-        textData = pygame.image.tostring(textSurface, "RGBA", True)
-        glWindowPos2d(self.textX1, self.textY1)
-        glDrawPixels(textSurface.get_width(), textSurface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, textData)
-
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
 
         """"LIGHTS"""
         self.shader.set_global_light_direction(Point(-0.3, -1.0, -0.4))
-        self.shader.set_global_light_color(Color(0.01, 0.01, 0.01))
+        self.shader.set_global_light_color(Color(0.11, 0.11, 0.11))
 
         if self.SPACE_key_down:
             self.shader.set_active_flashlight(1.0)
             self.shader.set_flashlight_direction(self.view_matrix.n)
             self.shader.set_flashlight_color(Color(1.0, 209/255, 178/255))
-            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y * 0.5, self.view_matrix.eye.z))
+            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y - 0.1, self.view_matrix.eye.z))
             self.shader.set_flashlight_cutoff(cos((40 + 6.5) * pi/180))
             self.shader.set_flashlight_outer_cutoff(cos((40 + 11.5) * pi/180))
             self.shader.set_flashlight_constant(1.0)
@@ -371,7 +460,8 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
         glDisable(GL_TEXTURE_2D)'''
-        """glEnable(GL_TEXTURE_2D)
+
+        glEnable(GL_TEXTURE_2D)
         glColor3f(1, 1, 1)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_floorandceiling)
         if self.lvl == 1:
@@ -385,7 +475,7 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)"""
+        glDisable(GL_TEXTURE_2D)
 
         glEnable(GL_TEXTURE_2D)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_wall_diffuse)
