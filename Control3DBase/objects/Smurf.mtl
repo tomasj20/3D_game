@@ -1,0 +1,31 @@
+# Max2Mtl Version 4.0 Mar 10th, 2001
+#
+# Multi/Sub Material__35 (3) to come 
+#
+newmtl smurf_blue
+Ka  0.4 0.4 0.8
+Kd  0.4 0.4 0.8
+Ks  1.0 1.0 1.0
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl smurf_white
+Ka  1.0 1.0 1.0
+Kd  1.0 1.0 1.0
+Ks  1.0 1.0 1.0
+d  1.0
+Ns  0.0
+illum 2
+#
+newmtl 13_-_Default
+Ka  0.0 0.0 0.0
+Kd  0.0 0.0 0.0
+Ks  0.9 0.9 0.9
+d  1.0
+Ns  4.9
+illum 2
+#
+# Multi/Sub Material__35 done 
+#
+# EOF

@@ -44,8 +44,8 @@ class Shader3D:
         self.viewMatrixLoc			= glGetUniformLocation(self.renderingProgramID, "u_view_matrix")
         self.projectionMatrixLoc = glGetUniformLocation(self.renderingProgramID, "u_projection_matrix")
 
-        self.globalLightDirection = glGetUniformLocation(self.renderingProgramID, "u_global_light_direction")
-        self.globalLightColor     = glGetUniformLocation(self.renderingProgramID, "u_global_light_color")
+        self.normalLightDirection = glGetUniformLocation(self.renderingProgramID, "u_normal_light_direction")
+        self.normalLightColor     = glGetUniformLocation(self.renderingProgramID, "u_normal_light_color")
 
         self.lightPosition = glGetUniformLocation(self.renderingProgramID, "u_light_position")
         self.lightColor = glGetUniformLocation(self.renderingProgramID, "u_light_color")
@@ -74,6 +74,8 @@ class Shader3D:
 
         self.textureLoc = glGetAttribLocation(self.renderingProgramID, "a_uv")
         glEnableVertexAttribArray(self.textureLoc)
+
+
 
 
         self.diffuse_texture = glGetUniformLocation(self.renderingProgramID, "u_tex_diffuse")
@@ -106,8 +108,6 @@ class Shader3D:
     def set_projection_matrix(self, matrix_array):
         glUniformMatrix4fv(self.projectionMatrixLoc, 1, True, matrix_array)
 
-    #def set_solid_color(self, red, green, blue):
-        #glUniform4f(self.colorLoc, red, green, blue, 1.0)
 
     def set_position_attribute(self, vertex_array):
         glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 0, vertex_array)
@@ -118,11 +118,11 @@ class Shader3D:
     def set_texture_attribute(self, vertex_array):
         glVertexAttribPointer(self.textureLoc, 2, GL_FLOAT, False, 0, vertex_array)
 
-    def set_global_light_direction(self, pos):
-        glUniform4f(self.globalLightDirection, pos.x, pos.y, pos.z, 1.0)
+    def set_normal_light_direction(self, pos):
+        glUniform4f(self.normalLightDirection, pos.x, pos.y, pos.z, 1.0)
 
-    def set_global_light_color(self, rgb):
-        glUniform4f(self.globalLightColor, rgb.r, rgb.g, rgb.b, 1.0)
+    def set_normal_light_color(self, rgb):
+        glUniform4f(self.normalLightColor, rgb.r, rgb.g, rgb.b, 1.0)
 
     def set_flashlight_position(self, pos):
         glUniform4f(self.flashlightPosition, pos.x, pos.y, pos.z, 1.0)
@@ -178,15 +178,12 @@ class Shader3D:
     def set_material_emit(self, e):
         glUniform1f(self.materialEmit, e)
 
-    def set_attribute_buffers(self, vertex_buffer_id, has_texture=0):
+    def set_attribute_buffers(self, vertex_buffer_id):
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
-        if has_texture:
-            glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
-            glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
-            glVertexAttribPointer(self.textureLoc, 2, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(6 * sizeof(GLfloat)))
-        else:
-            glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 6 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
-            glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 6 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
+        glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
+        glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
+        glVertexAttribPointer(self.textureLoc, 2, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(6 * sizeof(GLfloat)))
+
 
     def set_material_diffuse(self, color):
         glUniform4f(self.materialDiffuseLoc, color.r, color.g, color.b, 1.0)
