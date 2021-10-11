@@ -1,5 +1,4 @@
 import OpenGL.error
-from math import *
 import OpenGL.GLU
 import OpenGL.GL
 

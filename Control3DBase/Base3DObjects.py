@@ -1,12 +1,5 @@
-
-import random
-from random import *
 import numpy as np
 from OpenGL.GL import *
-from OpenGL.GLU import *
-import pyrr
-import numpy
-import math
 from math import *
 
 
@@ -202,7 +195,6 @@ class Sphere:
 class MeshModel:
     def __init__(self):
         self.vertex_arrays = dict()
-        #self.index_arrays = dict()
         self.mesh_materials = dict()
         self.materials = dict()
         self.vertex_counts = dict()

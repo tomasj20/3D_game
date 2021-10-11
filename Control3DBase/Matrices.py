@@ -149,7 +149,8 @@ class ViewMatrix:
                         -s * t.y + c * self.n.y,
                         -s * t.z + c * self.n.z)
 
-    """def pitch(self, angle):
+    """ Decided not to use this for this assignment not important for this game
+    def pitch(self, angle):
         # Rotate around u
         ang_cos = cos(angle)
         ang_sin = sin(angle)
@@ -188,8 +189,6 @@ class ProjectionMatrix:
 
         self.is_orthographic = True
 
-    ## MAKE OPERATION TO SET PERSPECTIVE PROJECTION (don't forget to set is_orthographic to False) ##
-    # ---
     def set_perspective(self, fovy, aspect, near, far):
         self.near = near
         self.far = far
@@ -236,57 +235,4 @@ class ProjectionMatrix:
                     0,0,-1,0]
 
 
-
-
-# The ProjectionViewMatrix returns a hardcoded matrix
-# that is just used to get something to send to the
-# shader before you properly implement the ViewMatrix
-# and ProjectionMatrix classes.
-# Feel free to throw it away afterwards!
-
-
-# IDEAS FOR OPERATIONS AND TESTING:
-# if __name__ == "__main__":
-#     matrix = ModelMatrix()
-#     matrix.push_matrix()
-#     print(matrix)
-#     matrix.add_translation(3, 1, 2)
-#     matrix.push_matrix()
-#     print(matrix)
-#     matrix.add_scale(2, 3, 4)
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-    
-#     matrix.add_translation(5, 5, 5)
-#     matrix.push_matrix()
-#     print(matrix)
-#     matrix.add_scale(3, 2, 3)
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-    
-#     matrix.pop_matrix()
-#     print(matrix)
-        
-#     matrix.push_matrix()
-#     matrix.add_scale(2, 2, 2)
-#     print(matrix)
-#     matrix.push_matrix()
-#     matrix.add_translation(3, 3, 3)
-#     print(matrix)
-#     matrix.push_matrix()
-#     matrix.add_rotation_y(pi / 3)
-#     print(matrix)
-#     matrix.push_matrix()
-#     matrix.add_translation(1, 1, 1)
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
     
