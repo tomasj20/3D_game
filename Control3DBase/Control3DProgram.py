@@ -1,21 +1,13 @@
-
 from OpenGL.GL import *
-from OpenGL.GLU import *
 from OpenGL.GLUT import *
 from math import *
-import time
 import pygame
 from pygame.locals import *
-
 import sys
-import time
 from objloader import *
 from Base3DObjects import *
 from Shaders import *
 from Matrices import *
-import os
-import pywavefront
-
 from Control3DBase import objloader
 
 
@@ -31,6 +23,7 @@ class GraphicsProgram3D:
         self.view_matrix = ViewMatrix()
         self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
+
         """Sounds"""
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
@@ -39,14 +32,17 @@ class GraphicsProgram3D:
         self.danger_sound = pygame.mixer.Sound("sounds/heartbeat.wav")
         self.dead = pygame.mixer.Sound("sounds/dead.wav")
         self.jumpscare = pygame.mixer.Sound("sounds/jumpscare.wav")
-        #self.jumpscare = pygame.mixer.Channel(0).play(pygame.mixer.Sound('sounds/jumpscare.wav'))
-        #self.danger_sound = pygame.mixer.Channel(1).play(pygame.mixer.Sound("sounds/heartbeat.wav"))
 
 
-        #Textures
-        #self.tex_id_obj = self.load_texture("./textures/slenderman.PNG")
+        self.flashlight_angle = 0
+
         self.shader.set_diffuse_texture(0)
         self.tex_id_wall_diffuse = self.load_texture("./textures/gravel.jpeg")
+
+        self.tex_id_vurdulak_diffuse = self.load_texture("./textures/vurdalak_Base_Color.jpg")
+        self.tex_id_vurdulak_specular = self.load_texture("./textures/vurdalak_Base_Color.jpg")
+        self.tex_id_flashlight_diffuse = self.load_texture("./textures/black.jpeg")
+        self.tex_id_flashlight_specular = self.load_texture("./textures/black.jpeg")
 
         self.shader.set_specular_texture(1)
         self.tex_id_wall_specular = self.load_texture("./textures/gravel.jpeg")
@@ -64,8 +60,9 @@ class GraphicsProgram3D:
         self.cube = Cube()
         self.scale = Point(1, 1, 1)
         self.clock = pygame.time.Clock()
-
+        """Obj models"""
         self.obj_model = objloader.load_obj_file(sys.path[0] + '/objects/', 'vurdalak_low.obj')
+        self.obj_model_flashlight = objloader.load_obj_file(sys.path[0] + '/objects/', 'FlashlightOBJ.obj')
 
         self.monster_pos = self.view_matrix.eye
 
@@ -125,8 +122,11 @@ class GraphicsProgram3D:
         ]
 
         self.ceilingandfloorlvl1 = [
-            [8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
-            [8.1, 2.0, 0.0, 4.0, 1.0, 7.0, False],
+            [8.1, 0.0, 1.0, 4.0, 1.0, 8.0, False],
+            [8.1, 2.0, 1.0, 4.0, 1.0, 8.0, False],
+        ]
+        self.floor_lvl2 = [
+            [10, 0.0, 1.0, 10, 1.0, 10.0, False]
         ]
 
         self.monster_pos_locations = [
@@ -179,13 +179,13 @@ class GraphicsProgram3D:
 
         self.ENTER_key_down = True
 
-
-
     def check_if_won(self):
-        if 8.0 <= self.view_matrix.eye.x <= 9 and -0.9 >= self.view_matrix.eye.z >= -1.1 and self.lvl ==1:
+        if 8.0 <= self.view_matrix.eye.x <= 9 and -0.9 >= self.view_matrix.eye.z >= -1.1 and self.lvl == 1:
             self.lvl = 2
             pygame.mixer.Sound.play(self.lvlup_sound)
-            self.view_matrix.look(Point(8, 1, 5.5), Point(0, 1.0, 0), Vector(0, 1, 0))
+            self.view_matrix.look(Point(13.5, 1, 5.5), Point(13.5, 1.0, 0), Vector(0, 1, 0))
+            self.looking_at_monster_count = 1
+            self.looking_at_monster_count_other = 1
             print("You solved the maze!")
 
 
@@ -194,9 +194,9 @@ class GraphicsProgram3D:
             quit()
 
     def check_if_died(self):
-        if (self.view_matrix.eye.x >= 10.0 and self.lvl == 1) or self.view_matrix.eye.x <= 6 and 7 >= self.view_matrix.eye.z >= -3 and self.lvl == 1:
+        if (self.view_matrix.eye.x >= 10.0 and self.lvl == 1) or self.view_matrix.eye.x <= 6 and 5 >= self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
-        if self.view_matrix.eye.z >= 7.0 and self.lvl == 1:
+        if self.view_matrix.eye.z >= 5.2 and self.lvl == 1:
             self.falling = True
         if (self.view_matrix.eye.x >= 30.0 and self.lvl == 2) or self.view_matrix.eye.x <= 5.0 and 10 >= self.view_matrix.eye.z >= -10 and self.lvl == 2:
             self.falling = True
@@ -204,60 +204,48 @@ class GraphicsProgram3D:
             self.falling = True
 
     def check_distance_from_monster(self):
-        look_x_min = 6.3
-        look_x_max = 7.7
-        look_z_min = 0.0
-        look_z_max = 1.0
-        other_x_min = 8.9
-        other_x_max = 10.0
-        other_z_min = 2.0
-        other_z_max = 3.0
-        for item in self.monster_pos_locations:
-            if item[0]+1 >= self.view_matrix.eye.x >= item[0]-1:
-                if item[2]+1 >= self.view_matrix.eye.z >= item[2]-1:
-                    self.danger_Close = True
-                    if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.40:
-                        if look_x_min <= self.view_matrix.eye.x <= look_x_max:
-                            if look_z_min <= self.view_matrix.eye.z <= look_z_max:
-                                self.looking_at_monster_count += 1
-                    if self.view_matrix.n.x >= 0 and -0.40 <= self.view_matrix.n.z <= 0.40:
-                        if other_x_min <= self.view_matrix.eye.x <= other_x_max:
-                            if other_z_min <= self.view_matrix.eye.z <= other_z_max:
-                                self.looking_at_monster_count_other += 1
-                return True
-            else:
-                self.danger_Close = False
-            look_x_min = 13.7
-            look_x_max = 14.8
-            look_z_min = -2.7
-            look_z_max = 0.5
-            other_x_min = 12.0 #7.0, 1.0, 4.5
-            other_x_max = 13.0
-            other_z_min = -2.5
-            other_z_max = 0.5
+        if self.lvl == 1:
+            look_x_min = 6.1
+            look_x_max = 7.7
+            look_z_min = 0.0
+            look_z_max = 1.0
+            other_x_min = 8.9
+            other_x_max = 10.0
+            other_z_min = 2.0
+            other_z_max = 3.0
+            if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.80:
+                if look_x_min <= self.view_matrix.eye.x <= look_x_max:
+                    if look_z_min <= self.view_matrix.eye.z <= look_z_max:
+                        self.looking_at_monster_count += 1
+            if self.view_matrix.n.x >= 0 and -0.60 <= self.view_matrix.n.z <= 0.40:
+                if other_x_min <= self.view_matrix.eye.x <= other_x_max:
+                    if other_z_min <= self.view_matrix.eye.z <= other_z_max:
+                        self.looking_at_monster_count_other += 1
+        if self.lvl == 2:
+            look_x_min_2 = 13.7
+            look_x_max_2 = 14.8
+            look_z_min_2 = -2.7
+            look_z_max_2 = 0.5
+            other_x_min_2 = 12.0
+            other_x_max_2 = 13.0
+            other_z_min_2 = -2.5
+            other_z_max_2 = 0.5
             third_x_min = 6.5
             third_x_max = 7.5
             third_z_min = 4.0
             third_z_max = 5.0
             if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.40:
-                if look_x_min <= self.view_matrix.eye.x <= look_x_max:
-                    if look_z_min <= self.view_matrix.eye.z <= look_z_max:
+                if look_x_min_2 <= self.view_matrix.eye.x <= look_x_max_2:
+                    if look_z_min_2 <= self.view_matrix.eye.z <= look_z_max_2:
                         self.looking_at_monster_count += 1
             if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.40:
-                if other_x_min <= self.view_matrix.eye.x <= other_x_max:
-                    if other_z_min <= self.view_matrix.eye.z <= other_z_max:
+                if other_x_min_2 <= self.view_matrix.eye.x <= other_x_max_2:
+                    if other_z_min_2 <= self.view_matrix.eye.z <= other_z_max_2:
                         self.looking_at_monster_count += 1
-            if self.view_matrix.n.x >= 0 and -0.40 <= self.view_matrix.n.z <= 0.40:
+            if self.view_matrix.n.x >= 0 and -0.60 <= self.view_matrix.n.z <= 0.40:
                 if third_x_min <= self.view_matrix.eye.x <= third_x_max:
                     if third_z_min <= self.view_matrix.eye.z <= third_z_max:
                         self.looking_at_monster_count_other += 1
-
-
-
-
-
-
-
 
     def collison_check(self):
         if self.lvl == 1:
@@ -267,8 +255,6 @@ class GraphicsProgram3D:
                     wall_max_x = item[0] + item[3] / 2
                     wall_min_z = item[2] - item[5] / 2
                     wall_max_z = item[2] + item[5] / 2
-
-
                     if wall_max_x+0.2 >= self.view_matrix.eye.x >= wall_max_x+0.1:
                         if wall_min_z-0.1 <= self.view_matrix.eye.z <= wall_max_z+0.1:
                             self.collisionRightWall = True
@@ -333,9 +319,6 @@ class GraphicsProgram3D:
                     else:
                         self.collisionBottomWall = False
 
-
-
-
     def load_texture(self, image):
         """ Loads a texture into the buffer """
         texture_surface = pygame.image.load(image)
@@ -359,20 +342,18 @@ class GraphicsProgram3D:
     def update(self):
         delta_time = self.clock.tick() / 1000.0
 
-
-        self.angle += pi * delta_time
-
         if self.A_key_down:
             self.view_matrix.yaw(-120*delta_time)
+            self.flashlight_angle += -((2*pi)/3) * delta_time
         if self.D_key_down:
             self.view_matrix.yaw(120 * delta_time)
+            self.flashlight_angle += ((2*pi)/3) * delta_time
         if self.T_key_down:
             self.fov -= 0.25 * delta_time
         if self.G_key_down:
             self.fov += 0.25 * delta_time
         if self.UP_key_down and not self.collisionLeftWall and not self.collisionRightWall and not self.collisionTopWall and not self.collisionBottomWall and not self.ENTER_key_down:
             self.view_matrix.slide(0, 0, -1.5 * delta_time)
-
 
         if self.falling:
             pygame.mixer.Sound.play(self.crash_sound)
@@ -443,28 +424,31 @@ class GraphicsProgram3D:
             pygame.quit()
             quit()
             print("You died")
-        #if self.danger_Close == True:
-            #pygame.mixer.Sound.play(self.danger_sound)
-        #if self.looking_at_monster_count >= 220:
-            #pygame.mixer.Sound.play(self.dead)
+
         if self.looking_at_monster_count >= 350:
             self.JUMPSCARE = True
             pygame.mixer.Sound.play(self.jumpscare)
-        if self.looking_at_monster_count >= 380:
+        if self.looking_at_monster_count >= 400:
             self.ENTER_key_down = True
-            self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
+            if self.lvl == 1:
+                self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
+            if self.lvl == 2:
+                self.view_matrix.look(Point(13.5, 1, 5.5), Point(13.5, 1.0, 0), Vector(0, 1, 0))
             self.looking_at_monster_count = 1
             self.JUMPSCARE = False
+            self.flashlight_angle = 0
         if self.looking_at_monster_count_other >= 350:
             self.JUMPSCARE_other = True
             pygame.mixer.Sound.play(self.jumpscare)
         if self.looking_at_monster_count_other >= 400:
             self.ENTER_key_down = True
-            self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
+            if self.lvl == 1:
+                self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
+            if self.lvl == 2:
+                self.view_matrix.look(Point(13.5, 1, 5.5), Point(13.5, 1.0, 0), Vector(0, 1, 0))
             self.looking_at_monster_count_other = 1
             self.JUMPSCARE_other = False
-        #if self.lvl == 1:
-            #pygame.mixer.Sound.play(self.soundtrack_sound)
+            self.flashlight_angle = 0
         self.check_if_won()
         self.check_if_died()
         self.collison_check()
@@ -488,10 +472,6 @@ class GraphicsProgram3D:
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
 
-
-
-
-
         """"LIGHTS"""
         self.shader.set_normal_light_direction(Point(-0.3, -1.0, -0.4))
         self.shader.set_normal_light_color(Color(0.01, 0.01, 0.01))
@@ -507,7 +487,7 @@ class GraphicsProgram3D:
             self.shader.set_active_flashlight(1.0)
             self.shader.set_flashlight_direction(self.view_matrix.n)
             self.shader.set_flashlight_color(Color(0.9725, 0.7647, 0.4667))
-            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y - 0.1, self.view_matrix.eye.z))
+            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y - 0.1, self.view_matrix.eye.z-0.2))
             """cut off: calculate the cosine value based on an angle and pass the cosine result to the fragment shader."""
             self.shader.set_flashlight_cutoff(cos((40 + 6.5) * pi/180))
             self.shader.set_flashlight_outer_cutoff(cos((40 + 11.5) * pi/180))
@@ -523,6 +503,7 @@ class GraphicsProgram3D:
         This is almost exactly like the flashlight except we need to point the vector down on the player,
         so he get's a nice lantern like lighting around him
         """
+
         self.shader.set_light_direction(self.view_matrix.v)
         self.shader.set_light_color(Color(0.9725, 0.7647, 0.4667))
         self.shader.set_light_position(
@@ -533,20 +514,7 @@ class GraphicsProgram3D:
         self.shader.set_light_linear(0.14)
         self.shader.set_light_quad(0.07)
 
-
-
-        """self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(7.0, 1.0, 5.0)
-        self.model_matrix.add_scale(2.0, 2.0, 2.0)
-        self.shader.set_model_matrix(self.shader)
-        self.obj_model.draw(self.shader)
-        self.model_matrix.pop_matrix()"""
-
-
-
-
-        """glEnable(GL_TEXTURE_2D)
+        glEnable(GL_TEXTURE_2D)
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_floorandceiling)
         glActiveTexture(GL_TEXTURE1)
@@ -562,13 +530,16 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)"""
+        if self.lvl == 2:
+            for index in self.floor_lvl2:
+                self.model_matrix.push_matrix()
+                self.model_matrix.add_translation(index[0], index[1], index[2])
+                self.model_matrix.add_scale(index[3], index[4], index[5])
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+                self.cube.draw()
+                self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
 
-        """self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y, self.view_matrix.eye.z-1)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.sphere.draw()
-        self.model_matrix.pop_matrix()"""
 
         if self.ENTER_key_down:
             glEnable(GL_TEXTURE_2D)
@@ -615,8 +586,31 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-
         glDisable(GL_TEXTURE_2D)
+        glEnable(GL_TEXTURE_2D)
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_flashlight_diffuse)
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_flashlight_specular)
+        self.shader.set_material_diffuse(Color(0.7, 0.7, 0.7))
+        self.shader.set_material_specular(Color(0.5, 0.5, 0.5))
+        self.shader.set_material_shiny(10)
+        self.shader.set_material_emit(0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.2, self.view_matrix.eye.z)
+        self.model_matrix.add_rotate_x(pi/2)
+        self.model_matrix.add_rotate_z(self.flashlight_angle)
+        self.model_matrix.add_scale(0.1, 0.1, 0.7)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.obj_model_flashlight.draw(self.shader)
+        self.model_matrix.pop_matrix()
+        glDisable(GL_TEXTURE_2D)
+
+        glEnable(GL_TEXTURE_2D)
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_vurdulak_diffuse)
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id_vurdulak_specular)
         if self.lvl == 1:
             self.model_matrix.load_identity()
             #self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
@@ -652,7 +646,7 @@ class GraphicsProgram3D:
                 self.shader.set_model_matrix(self.model_matrix.matrix)
                 self.obj_model.draw(self.shader)
                 self.model_matrix.pop_matrix()
-
+        glDisable(GL_TEXTURE_2D)
         glDisable(GL_BLEND)
 
         pygame.display.flip()

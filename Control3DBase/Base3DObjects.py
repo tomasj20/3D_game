@@ -202,7 +202,7 @@ class Sphere:
 class MeshModel:
     def __init__(self):
         self.vertex_arrays = dict()
-        # self.index_arrays = dict()
+        #self.index_arrays = dict()
         self.mesh_materials = dict()
         self.materials = dict()
         self.vertex_counts = dict()

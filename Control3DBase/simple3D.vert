@@ -2,7 +2,7 @@ attribute vec3 a_position;
 attribute vec3 a_normal;
 attribute vec2 a_uv;
 
-//## ADD CODE HERE ##
+
 
 uniform mat4 u_model_matrix;
 uniform mat4 u_view_matrix;
