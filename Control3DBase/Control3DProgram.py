@@ -29,13 +29,18 @@ class GraphicsProgram3D:
         self.lvl = 1
         self.model_matrix = ModelMatrix()
         self.view_matrix = ViewMatrix()
-        self.view_matrix.look(Point(7, 1, 3.5), Point(10, 1.0, 0), Vector(0, 1, 0))
+        self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         """Sounds"""
         self.crash_sound = pygame.mixer.Sound("sounds/scream.wav")
         self.lvlup_sound = pygame.mixer.Sound("sounds/lvlcomplete.wav")
         self.soundtrack_sound = pygame.mixer.Sound("sounds/soundtrack.wav")
         self.flashlight_click = pygame.mixer.Sound("sounds/flashlight.wav")
+        self.danger_sound = pygame.mixer.Sound("sounds/heartbeat.wav")
+        self.dead = pygame.mixer.Sound("sounds/dead.wav")
+        self.jumpscare = pygame.mixer.Sound("sounds/jumpscare.wav")
+        #self.jumpscare = pygame.mixer.Channel(0).play(pygame.mixer.Sound('sounds/jumpscare.wav'))
+        #self.danger_sound = pygame.mixer.Channel(1).play(pygame.mixer.Sound("sounds/heartbeat.wav"))
 
 
         #Textures
@@ -49,8 +54,9 @@ class GraphicsProgram3D:
         self.tex_id_floorandceiling = self.load_texture("./textures/gravel.jpeg")
         self.tex_id_floorandceiling_specular = self.load_texture("./textures/gravel.jpeg")
 
-        self.tex_id_monster = self.load_texture("./objects/vurdalak_Base_Color.jpg")
-        self.tex_id_monster_specular = self.load_texture("./objects/vurdalak_Base_Color.jpg")
+        self.tex_id_jumpscare_diffuse = self.load_texture("./textures/screen.png")
+        self.tex_id_jumpscare_specular = self.load_texture("./textures/screen.png")
+
         self.projection_matrix = ProjectionMatrix()
         self.fov = pi / 2
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
@@ -92,6 +98,7 @@ class GraphicsProgram3D:
             [13.0, 1.0, 2.3, 3.8, 1.0, 0.2, False],
             [10.0, 1.0, 2.7, 0.2, 1.0, 1.0, False],
             [8.7, 1.0, 2.3, 2.5, 1.0, 0.2, False],
+            #[14.0, 1.0, -2.6, 1.0, 1.0, 1.0, False]
             #[6.6, 1.0, -5.1, 0.2, 1.0, 1.123, True],
         ]
         self.wall_list2 = [
@@ -111,6 +118,8 @@ class GraphicsProgram3D:
             [7.2, 1.0, 1.5, 0.2, 1, 1.0, False],
             [8.65, 1.0, 2.0, 1.3, 1.0, 0.2, False],
             [8.1, 1.0, 2.6, 0.2, 1, 1.0, False],
+            #[6.9, 1.0, 0.5, 1.0, 1, 1.0, False],
+            #[9.4, 1.0, 2.5, 1.0, 1.0, 1.0, False]
 
         ]
 
@@ -118,15 +127,27 @@ class GraphicsProgram3D:
             [8.1, 0.0, 0.0, 4.0, 1.0, 7.0, False],
             [8.1, 2.0, 0.0, 4.0, 1.0, 7.0, False],
         ]
+
+        self.monster_pos_locations = [
+            [8.8, 0.6, 2.4, pi/2],
+            #[7.6, 0.6, 3.0, pi],
+            [6.8, 0.6, 1.4, pi],
+        ]
+        self.monster_pos_locations_lvl_2 = [
+            [14.5, 0.6, 0.6, pi] #14.0, 0.6, -2.6
+        ]
+
         self.angle = 0
 
-
+        self.JUMPSCARE = False
+        self.JUMPSCARE_other = False
 
         self.collisionLeftWall = False
         self.collisionRightWall = False
         self.collisionTopWall = False
         self.collisionBottomWall = False
 
+        self.danger_Close = False
 
         self.A_key_down = False
         self.D_key_down = False
@@ -142,12 +163,17 @@ class GraphicsProgram3D:
         self.left_collision = False
         self.SPACE_key_down = False
 
+        self.looking_at_monster_count = 1
+        self.looking_at_monster_count_other = 1
+
         #Player is the view
         self.player_pos = self.view_matrix.eye
         self.radius = 0.02
 
         self.textX1 = 30
         self.textY1 = 500
+
+        self.ENTER_key_down = True
 
 
 
@@ -164,14 +190,41 @@ class GraphicsProgram3D:
             quit()
 
     def check_if_died(self):
-        if (self.view_matrix.eye.x >= 10.0 and self.lvl == 1) or self.view_matrix.eye.x <= 6 and 4 >= self.view_matrix.eye.z >= -3 and self.lvl == 1:
+        if (self.view_matrix.eye.x >= 10.0 and self.lvl == 1) or self.view_matrix.eye.x <= 6 and 7 >= self.view_matrix.eye.z >= -3 and self.lvl == 1:
             self.falling = True
-        if self.view_matrix.eye.z >= 5.0 and self.lvl == 1:
+        if self.view_matrix.eye.z >= 7.0 and self.lvl == 1:
             self.falling = True
         if (self.view_matrix.eye.x >= 30.0 and self.lvl == 2) or self.view_matrix.eye.x <= 5.0 and 10 >= self.view_matrix.eye.z >= -10 and self.lvl == 2:
             self.falling = True
         if self.view_matrix.eye.z >= 7.3 and self.lvl == 2:
             self.falling = True
+
+    def check_distance_from_monster(self):
+        look_x_min = 6.3
+        look_x_max = 7.7
+        look_z_min = 0.0
+        look_z_max = 1.0
+        other_x_min = 8.9
+        other_x_max = 10.0
+        other_z_min = 2.0
+        other_z_max = 3.0
+        for item in self.monster_pos_locations:
+            if item[0]+1 >= self.view_matrix.eye.x >= item[0]-1:
+                if item[2]+1 >= self.view_matrix.eye.z >= item[2]-1:
+                    self.danger_Close = True
+                    if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.40:
+                        if look_x_min <= self.view_matrix.eye.x <= look_x_max:
+                            if look_z_min <= self.view_matrix.eye.z <= look_z_max:
+                                self.looking_at_monster_count += 1
+                    if self.view_matrix.n.x >= 0 and -0.40 <= self.view_matrix.n.z <= 0.40:
+                        if other_x_min <= self.view_matrix.eye.x <= other_x_max:
+                            if other_z_min <= self.view_matrix.eye.z <= other_z_max:
+                                self.looking_at_monster_count_other += 1
+                return True
+            else:
+                self.danger_Close = False
+
+
 
 
 
@@ -287,7 +340,7 @@ class GraphicsProgram3D:
             self.fov -= 0.25 * delta_time
         if self.G_key_down:
             self.fov += 0.25 * delta_time
-        if self.UP_key_down and not self.collisionLeftWall and not self.collisionRightWall and not self.collisionTopWall and not self.collisionBottomWall:
+        if self.UP_key_down and not self.collisionLeftWall and not self.collisionRightWall and not self.collisionTopWall and not self.collisionBottomWall and not self.ENTER_key_down:
             self.view_matrix.slide(0, 0, -1.5 * delta_time)
 
 
@@ -360,11 +413,32 @@ class GraphicsProgram3D:
             pygame.quit()
             quit()
             print("You died")
+        #if self.danger_Close == True:
+            #pygame.mixer.Sound.play(self.danger_sound)
+        #if self.looking_at_monster_count >= 220:
+            #pygame.mixer.Sound.play(self.dead)
+        if self.looking_at_monster_count >= 350:
+            self.JUMPSCARE = True
+            pygame.mixer.Sound.play(self.jumpscare)
+        if self.looking_at_monster_count >= 380:
+            self.ENTER_key_down = True
+            self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
+            self.looking_at_monster_count = 1
+            self.JUMPSCARE = False
+        if self.looking_at_monster_count_other >= 350:
+            self.JUMPSCARE_other = True
+            pygame.mixer.Sound.play(self.jumpscare)
+        if self.looking_at_monster_count_other >= 400:
+            self.ENTER_key_down = True
+            self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
+            self.looking_at_monster_count_other = 1
+            self.JUMPSCARE_other = False
         #if self.lvl == 1:
             #pygame.mixer.Sound.play(self.soundtrack_sound)
         self.check_if_won()
         self.check_if_died()
         self.collison_check()
+        self.check_distance_from_monster()
 
     def display(self):
         glEnable(GL_DEPTH_TEST)
@@ -383,6 +457,8 @@ class GraphicsProgram3D:
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.load_identity()
         self.cube.set_verticies(self.shader)
+
+
 
 
 
@@ -440,7 +516,7 @@ class GraphicsProgram3D:
 
 
 
-        glEnable(GL_TEXTURE_2D)
+        """glEnable(GL_TEXTURE_2D)
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.tex_id_floorandceiling)
         glActiveTexture(GL_TEXTURE1)
@@ -456,13 +532,28 @@ class GraphicsProgram3D:
 
                 self.cube.draw()
                 self.model_matrix.pop_matrix()
-        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_TEXTURE_2D)"""
 
         """self.model_matrix.push_matrix()
         self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y, self.view_matrix.eye.z-1)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw()
         self.model_matrix.pop_matrix()"""
+
+        if self.ENTER_key_down:
+            glEnable(GL_TEXTURE_2D)
+            glActiveTexture(GL_TEXTURE0)
+            glBindTexture(GL_TEXTURE_2D, self.tex_id_jumpscare_diffuse)
+            glActiveTexture(GL_TEXTURE1)
+            glBindTexture(GL_TEXTURE_2D, self.tex_id_jumpscare_specular)
+            self.model_matrix.push_matrix()
+            self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.07, self.view_matrix.eye.z-0.5)
+            self.model_matrix.add_scale(1.0, 0.5, 0.5)
+            self.shader.set_model_matrix(self.model_matrix.matrix)
+            self.cube.draw()
+            self.model_matrix.pop_matrix()
+            glDisable(GL_TEXTURE_2D)
+
 
         glEnable(GL_TEXTURE_2D)
         glActiveTexture(GL_TEXTURE0)
@@ -477,8 +568,6 @@ class GraphicsProgram3D:
             for index in self.wall_list:
                 self.model_matrix.push_matrix()
                 self.model_matrix.add_translation(index[0], index[1], index[2])
-                if index[6]:
-                    self.model_matrix.add_rotate_y(pi / 2)
                 self.model_matrix.add_scale(index[3], index[4], index[5])
                 self.shader.set_model_matrix(self.model_matrix.matrix)
 
@@ -498,20 +587,42 @@ class GraphicsProgram3D:
                 self.model_matrix.pop_matrix()
 
         glDisable(GL_TEXTURE_2D)
+        if self.lvl == 1:
+            self.model_matrix.load_identity()
+            #self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
+            self.cube.set_verticies(self.shader)
+            for item in self.monster_pos_locations:
+                self.model_matrix.push_matrix()
+                if not self.JUMPSCARE and not self.JUMPSCARE_other:
+                    self.model_matrix.add_translation(item[0], item[1], item[2])
+                if self.JUMPSCARE:
+                    self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.6, self.view_matrix.eye.z+0.5)
+                if self.JUMPSCARE_other:
+                    self.model_matrix.add_translation(self.view_matrix.eye.x-0.35, self.view_matrix.eye.y-0.6, self.view_matrix.eye.z)
+                self.model_matrix.add_rotate_y(item[3])
+                self.model_matrix.add_scale(0.4, 0.4, 0.4)
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+                self.obj_model.draw(self.shader)
+                self.model_matrix.pop_matrix()
+        if self.lvl == 2:
+            self.model_matrix.load_identity()
+            #self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
+            self.cube.set_verticies(self.shader)
+            for item in self.monster_pos_locations_lvl_2:
+                self.model_matrix.push_matrix()
+                if not self.JUMPSCARE and not self.JUMPSCARE_other:
+                    self.model_matrix.add_translation(item[0], item[1], item[2])
+                if self.JUMPSCARE:
+                    self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.6, self.view_matrix.eye.z+0.5)
+                if self.JUMPSCARE_other:
+                    self.model_matrix.add_translation(self.view_matrix.eye.x-0.35, self.view_matrix.eye.y-0.6, self.view_matrix.eye.z)
+                self.model_matrix.add_rotate_y(item[3])
+                self.model_matrix.add_scale(0.7, 0.7, 0.7)
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+                self.obj_model.draw(self.shader)
+                self.model_matrix.pop_matrix()
+
         glDisable(GL_BLEND)
-
-
-        self.model_matrix.load_identity()
-        #self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
-        self.cube.set_verticies(self.shader)
-        # self.shader.set_solid_color(0.0, 1.0, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.4, self.view_matrix.eye.z+0.6)
-        self.model_matrix.add_rotate_y(pi)
-        self.model_matrix.add_scale(0.4, 0.4, 0.4)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.obj_model.draw(self.shader)
-        self.model_matrix.pop_matrix()
 
         pygame.display.flip()
 
@@ -529,7 +640,7 @@ class GraphicsProgram3D:
                         print("Escaping!")
                         exiting = True
 
-                    if event.key == K_UP:
+                    if event.key == K_w:
                         self.UP_key_down = True
 
                     if event.key == K_DOWN:
@@ -551,8 +662,11 @@ class GraphicsProgram3D:
                         pygame.mixer.Sound.play(self.flashlight_click)
                         self.SPACE_key_down = True
 
+                    if event.key == K_RETURN:
+                        self.ENTER_key_down = False
+
                 elif event.type == pygame.KEYUP:
-                    if event.key == K_UP:
+                    if event.key == K_w:
                         self.UP_key_down = False
 
                     if event.key == K_DOWN:
@@ -572,6 +686,7 @@ class GraphicsProgram3D:
 
                     if event.key == K_SPACE:
                         self.SPACE_key_down = False
+
 
             
             self.update()

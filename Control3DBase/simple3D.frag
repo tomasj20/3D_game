@@ -74,6 +74,8 @@ vec4 calculate_light()
 	float lambert = max(dot(v_normal, light_dir), 0.0);
 	float phong = max(dot(v_normal, fvh), 0.0);
 	float distance    = length(u_light_position - v_position);
+	//We can retrieve the distance term by calculating the difference vector between the fragment
+	//and the light source and take that resulting vector's length.
 	float attenuation = 1.0 / (u_light_constant + u_light_linear * distance + //reduce the intensity of light over the distance
     		    			   u_light_quad * (distance * distance));
 	/*
@@ -102,8 +104,6 @@ vec4 calculate_flashlight()
 	vec4 fvh = normalize(flashlight_dir + f);
 	float lambert = max(dot(v_normal, flashlight_dir), 0.0);
 	float phong = max(dot(v_normal, fvh), 0.0);
-	//We can retrieve the distance term by calculating the difference vector between the fragment
-	//and the light source and take that resulting vector's length.
 	float distance    = length(u_flashlight_position - v_position);
 	float attenuation = 1.0 / (u_flashlight_constant + u_flashlight_linear * distance +
     		    			   u_flashlight_quad * (distance * distance));
