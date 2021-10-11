@@ -26,7 +26,7 @@ class GraphicsProgram3D:
         pygame.font.init()
         self.shader = Shader3D()
         self.shader.use()
-        self.lvl = 1
+        self.lvl = 2
         self.model_matrix = ModelMatrix()
         self.view_matrix = ViewMatrix()
         self.view_matrix.look(Point(7, 1, 5), Point(7, 1.0, 0.0), Vector(0, 1, 0))
@@ -98,7 +98,8 @@ class GraphicsProgram3D:
             [13.0, 1.0, 2.3, 3.8, 1.0, 0.2, False],
             [10.0, 1.0, 2.7, 0.2, 1.0, 1.0, False],
             [8.7, 1.0, 2.3, 2.5, 1.0, 0.2, False],
-            #[14.0, 1.0, -2.6, 1.0, 1.0, 1.0, False]
+            #[12.5, 1.0, 0.8, 1.0, 1.0, 1.0, False]
+            #[5.5, 1.0, 4.5, 1.0, 1.0, 1.0, False]
             #[6.6, 1.0, -5.1, 0.2, 1.0, 1.123, True],
         ]
         self.wall_list2 = [
@@ -134,7 +135,10 @@ class GraphicsProgram3D:
             [6.8, 0.6, 1.4, pi],
         ]
         self.monster_pos_locations_lvl_2 = [
-            [14.5, 0.6, 0.6, pi] #14.0, 0.6, -2.6
+            [14.5, 0.6, 0.6, pi], #14.0, 0.6, -2.6
+            [5.5, 0.4, 4.5, pi/2],
+            [12.5, 0.4, 0.8, pi]
+
         ]
 
         self.angle = 0
@@ -223,6 +227,32 @@ class GraphicsProgram3D:
                 return True
             else:
                 self.danger_Close = False
+            look_x_min = 13.7
+            look_x_max = 14.8
+            look_z_min = -2.7
+            look_z_max = 0.5
+            other_x_min = 12.0 #7.0, 1.0, 4.5
+            other_x_max = 13.0
+            other_z_min = -2.5
+            other_z_max = 0.5
+            third_x_min = 6.5
+            third_x_max = 7.5
+            third_z_min = 4.0
+            third_z_max = 5.0
+            if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.40:
+                if look_x_min <= self.view_matrix.eye.x <= look_x_max:
+                    if look_z_min <= self.view_matrix.eye.z <= look_z_max:
+                        self.looking_at_monster_count += 1
+            if self.view_matrix.n.z <= 0 and -0.40 <= self.view_matrix.n.x <= 0.40:
+                if other_x_min <= self.view_matrix.eye.x <= other_x_max:
+                    if other_z_min <= self.view_matrix.eye.z <= other_z_max:
+                        self.looking_at_monster_count += 1
+            if self.view_matrix.n.x >= 0 and -0.40 <= self.view_matrix.n.z <= 0.40:
+                if third_x_min <= self.view_matrix.eye.x <= third_x_max:
+                    if third_z_min <= self.view_matrix.eye.z <= third_z_max:
+                        self.looking_at_monster_count_other += 1
+
+
 
 
 
@@ -604,6 +634,7 @@ class GraphicsProgram3D:
                 self.shader.set_model_matrix(self.model_matrix.matrix)
                 self.obj_model.draw(self.shader)
                 self.model_matrix.pop_matrix()
+
         if self.lvl == 2:
             self.model_matrix.load_identity()
             #self.shader.set_material_diffuse(Color(1.0, 1.0, 0.0))
