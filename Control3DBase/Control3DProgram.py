@@ -128,6 +128,7 @@ class GraphicsProgram3D:
             [5.5, 0.4, 4.5, pi/2],
             [12.5, 0.4, 0.8, pi]
         ]
+        self.close_walls = []
 
         """A lot of stuff we need"""
         self.JUMPSCARE = False
@@ -224,9 +225,23 @@ class GraphicsProgram3D:
                     if third_z_min <= self.view_matrix.eye.z <= third_z_max:
                         self.looking_at_monster_count_other += 1
 
+    def get_walls_closest(self):
+        for item in self.wall_list2:
+            if item[0]-2.0 <= self.view_matrix.eye.x <= item[0]+2.0:
+                if item[2]-2.0 <= self.view_matrix.eye.z <= item[2]+2.0:
+                    if item not in self.close_walls:
+                        self.close_walls.append(item)
+                        continue
+                else:
+                    if item in self.close_walls:
+                        self.close_walls.remove(item)
+
+
+
+
     def collison_check(self):
         if self.lvl == 1:
-            for item in self.wall_list2:
+            for item in self.close_walls:
                 wall_min_x = item[0] - item[3] / 2
                 wall_max_x = item[0] + item[3] / 2
                 wall_min_z = item[2] - item[5] / 2
@@ -438,6 +453,8 @@ class GraphicsProgram3D:
         self.check_if_died()
         self.collison_check()
         self.check_distance_from_monster()
+        self.get_walls_closest()
+
 
     def display(self):
         glEnable(GL_DEPTH_TEST)
@@ -472,7 +489,7 @@ class GraphicsProgram3D:
             self.shader.set_active_flashlight(1.0)
             self.shader.set_flashlight_direction(self.view_matrix.n)
             self.shader.set_flashlight_color(Color(0.9725, 0.7647, 0.4667))
-            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y - 0.1, self.view_matrix.eye.z-0.2))
+            self.shader.set_flashlight_position(Point(self.view_matrix.eye.x, self.view_matrix.eye.y - 0.1, self.view_matrix.eye.z))
             """cut off: calculate the cosine value based on an angle and pass the cosine result to the fragment shader."""
             self.shader.set_flashlight_cutoff(cos((40 + 6.5) * pi/180))
             self.shader.set_flashlight_outer_cutoff(cos((40 + 11.5) * pi/180))
@@ -591,7 +608,7 @@ class GraphicsProgram3D:
         self.shader.set_material_shiny(10)
         self.shader.set_material_emit(0.0)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.2, self.view_matrix.eye.z-0.2)
+        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y-0.2, self.view_matrix.eye.z)
         self.model_matrix.add_rotate_x(pi/2)
         self.model_matrix.add_rotate_z(self.flashlight_angle)
         self.model_matrix.add_scale(0.1, 0.1, 0.7)
